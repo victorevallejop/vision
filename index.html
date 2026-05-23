@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visión | Centro Operativo Inteligente</title>
+
+  <style>
+    :root {
+      --bg: #071426;
+      --bg2: #0b1f3a;
+      --panel: rgba(255, 255, 255, 0.94);
+      --panel-soft: rgba(255, 255, 255, 0.84);
+      --line: rgba(148, 184, 220, 0.25);
+      --text: #102033;
+      --muted: #64748b;
+      --blue: #1d7df2;
+      --blue2: #54b6ff;
+      --cyan: #7ee7ff;
+      --green: #1f9d63;
+      --yellow: #b98000;
+      --red: #d92d20;
+      --orange: #f97316;
+      --shadow: 0 22px 60px rgba(0,0,0,.22);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: #fff;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(84, 182, 255, .26), transparent 32%),
+        radial-gradient(circle at 90% 10%, rgba(126, 231, 255, .16), transparent 35%),
+        linear-gradient(135deg, var(--bg) 0%, var(--bg2) 55%, #06111f 100%);
+      overflow-x: hidden;
+    }
+
+    .shell {
+      width: min(1480px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 22px 0 34px;
+    }
+
+    .hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) 360px;
+      gap: 22px;
+      align-items: stretch;
+      min-height: 270px;
+      margin-bottom: 20px;
+    }
+
+    .hero-main,
+    .hero-bot,
+    .panel {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(237,247,255,.90));
+      color: var(--text);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero-main {
+      padding: 28px;
+      position: relative;
+    }
+
+    .hero-main::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(29,125,242,.10), transparent 52%),
+        radial-gradient(circle at 86% 15%, rgba(84,182,255,.20), transparent 28%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(29,125,242,.12);
+      color: #0b4fa4;
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 16px;
+    }
+
+    .pulse {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--green);
+      box-shadow: 0 0 0 0 rgba(31,157,99,.55);
+      animation: pulse 1.4s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(31,157,99,.55); }
+      70% { box-shadow: 0 0 0 10px rgba(31,157,99,0); }
+      100% { box-shadow: 0 0 0 0 rgba(31,157,99,0); }
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 62px);
+      line-height: .96;
+      letter-spacing: -0.055em;
+      color: #0b1f3a;
+    }
+
+    .subtitle {
+      margin-top: 14px;
+      max-width: 860px;
+      font-size: 17px;
+      line-height: 1.5;
+      color: #425466;
+    }
+
+    .hero-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(110,148,190,.28);
+      color: #28425e;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .hero-bot {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 270px;
+      padding: 18px;
+      background:
+        radial-gradient(circle at 50% 22%, rgba(84,182,255,.28), transparent 36%),
+        linear-gradient(180deg, rgba(255,255,255,.95), rgba(230,245,255,.88));
+    }
+
+    .bot-wrap {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      min-height: 185px;
+    }
+
+    .bot-wrap img {
+      width: min(230px, 85%);
+      filter: drop-shadow(0 18px 28px rgba(11,31,58,.25));
+      animation: floatBot 3.4s ease-in-out infinite;
+    }
+
+    @keyframes floatBot {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .bot-caption {
+      padding: 13px 14px;
+      border-radius: 16px;
+      background: rgba(11,31,58,.88);
+      color: #eaf6ff;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .status-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .status-card,
+    .kpi-card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.94);
+      color: var(--text);
+      border-radius: 18px;
+      box-shadow: 0 14px 36px rgba(0,0,0,.14);
+      padding: 16px;
+    }
+
+    .status-label,
+    .kpi-label {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 800;
+    }
+
+    .status-value {
+      margin-top: 8px;
+      font-size: 18px;
+      font-weight: 900;
+      color: #0b1f3a;
+    }
+
+    .status-detail {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(130px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .kpi-card {
+      min-height: 118px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::after {
+      content: "";
+      position: absolute;
+      right: -32px;
+      top: -32px;
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      background: rgba(29,125,242,.10);
+    }
+
+    .kpi-value {
+      margin-top: 12px;
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: #0b1f3a;
+    }
+
+    .kpi-note {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .grid-main {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .panel {
+      padding: 0;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(120,150,180,.18);
+      background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(246,251,255,.92));
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 19px;
+      color: #0b1f3a;
+      letter-spacing: -0.02em;
+    }
+
+    .panel-subtitle {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .panel-body {
+      padding: 18px 20px 20px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .badge.operando,
+    .badge.ok,
+    .badge.baja {
+      background: rgba(31,157,99,.12);
+      color: #11643c;
+      border-color: rgba(31,157,99,.22);
+    }
+
+    .badge.alta,
+    .badge.alerta {
+      background: rgba(249,115,22,.13);
+      color: #a94700;
+      border-color: rgba(249,115,22,.24);
+    }
+
+    .badge.critica {
+      background: rgba(217,45,32,.12);
+      color: #b42318;
+      border-color: rgba(217,45,32,.25);
+    }
+
+    .badge.media,
+    .badge.go {
+      background: rgba(29,125,242,.12);
+      color: #0b4fa4;
+      border-color: rgba(29,125,242,.24);
+    }
+
+    .inc-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .inc-card {
+      border: 1px solid rgba(120,150,180,.22);
+      border-left: 6px solid var(--blue);
+      border-radius: 16px;
+      padding: 13px 14px;
+      background: rgba(255,255,255,.86);
+    }
+
+    .inc-card.alta {
+      border-left-color: var(--orange);
+    }
+
+    .inc-card.baja {
+      border-left-color: var(--green);
+    }
+
+    .inc-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .inc-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: #0b1f3a;
+      line-height: 1.25;
+    }
+
+    .inc-meta {
+      margin-top: 7px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px 12px;
+      color: #475569;
+      font-size: 12px;
+    }
+
+    .inc-meta b {
+      color: #1e344d;
+    }
+
+    .inc-note {
+      margin-top: 9px;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .function-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .function-card {
+      border: 1px solid rgba(120,150,180,.22);
+      border-radius: 18px;
+      background: rgba(255,255,255,.86);
+      padding: 16px;
+    }
+
+    .function-card h3 {
+      margin: 0 0 12px;
+      color: #0b1f3a;
+      font-size: 16px;
+    }
+
+    .check-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .check-item {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      color: #334155;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .check {
+      width: 19px;
+      height: 19px;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 12px;
+      font-weight: 900;
+      background: rgba(31,157,99,.14);
+      color: #11643c;
+    }
+
+    .next .check {
+      background: rgba(29,125,242,.12);
+      color: #0b4fa4;
+    }
+
+    .empty {
+      border: 1px dashed rgba(120,150,180,.38);
+      border-radius: 16px;
+      padding: 18px;
+      color: #64748b;
+      background: rgba(255,255,255,.58);
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: rgba(255,255,255,.72);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .loading {
+      display: grid;
+      place-items: center;
+      min-height: 220px;
+      color: rgba(255,255,255,.82);
+      font-weight: 700;
+    }
+
+    .error-box {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(217,45,32,.14);
+      border: 1px solid rgba(217,45,32,.30);
+      color: #fff;
+    }
+
+    @media (max-width: 1240px) {
+      .kpi-grid {
+        grid-template-columns: repeat(4, minmax(150px, 1fr));
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-bot {
+        min-height: auto;
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .bot-wrap {
+        min-height: 120px;
+        flex: 0 0 180px;
+      }
+
+      .bot-wrap img {
+        width: 145px;
+      }
+    }
+
+    @media (max-width: 920px) {
+      .status-row,
+      .grid-main,
+      .function-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-grid {
+        grid-template-columns: repeat(2, minmax(140px, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .shell {
+        width: min(100% - 18px, 1480px);
+        padding-top: 10px;
+      }
+
+      .hero-main {
+        padding: 20px;
+      }
+
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .inc-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-bot {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <div id="app" class="loading">
+      Cargando Visión...
+    </div>
+
+    <div class="footer">
+      Visión | Centro Operativo Inteligente · Campus Virtual · Actualización automática
+    </div>
+  </div>
+
+  <script>
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwkrOVT4hZ-vKM7avoJKaZYyJpygSr-QV7oRILybqKa5moZhp7pI8h_MQM_YV9tfwcd/exec';
+    const BOT_IMG = 'assets/vision-bot.png';
+    const REFRESH_SECONDS = 180;
+
+    let refreshLeft = REFRESH_SECONDS;
+    let refreshTimer = null;
+
+    function jsonp(url) {
+      return new Promise((resolve, reject) => {
+        const callbackName = '__visionCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+
+        window[callbackName] = function(data) {
+          try {
+            resolve(data);
+          } finally {
+            delete window[callbackName];
+            script.remove();
+          }
+        };
+
+        const script = document.createElement('script');
+        script.src = url + (url.includes('?') ? '&' : '?') +
+          'action=visionExecutiveSnapshot' +
+          '&callback=' + encodeURIComponent(callbackName) +
+          '&_=' + Date.now();
+
+        script.onerror = function() {
+          delete window[callbackName];
+          script.remove();
+          reject(new Error('No fue posible conectar con el endpoint de Visión.'));
+        };
+
+        document.body.appendChild(script);
+      });
+    }
+
+    async function cargarVision() {
+      try {
+        const data = await jsonp(GAS_URL);
+
+        if (!data || !data.ok) {
+          throw new Error((data && data.error) || 'Respuesta inválida del backend.');
+        }
+
+        render(data);
+        refreshLeft = REFRESH_SECONDS;
+
+      } catch (err) {
+        document.getElementById('app').innerHTML = `
+          <div class="error-box">
+            <strong>No fue posible cargar Visión.</strong><br><br>
+            ${escapeHtml(err.message)}
+          </div>
+        `;
+      }
+    }
+
+    function startRefreshClock() {
+      if (refreshTimer) clearInterval(refreshTimer);
+
+      refreshTimer = setInterval(() => {
+        refreshLeft--;
+
+        const el = document.getElementById('refreshCounter');
+        if (el) el.textContent = refreshLeft + ' s';
+
+        if (refreshLeft <= 0) {
+          cargarVision();
+          refreshLeft = REFRESH_SECONDS;
+        }
+      }, 1000);
+    }
+
+    function render(data) {
+      const estado = data.estado || {};
+      const k = data.kpis || {};
+      const motor = data.motor || {};
+      const bandeja = data.bandeja || {};
+      const impacto = data.impacto || {};
+      const sistema = data.sistema || {};
+
+      document.getElementById('app').className = '';
+      document.getElementById('app').innerHTML = `
+        ${renderHero(sistema, estado)}
+        ${renderStatusRow(sistema, estado)}
+        ${renderKpis(k)}
+        <div class="grid-main">
+          ${renderMotor(motor)}
+          ${renderBandeja(bandeja)}
+        </div>
+        ${renderImpacto(impacto)}
+      `;
+
+      startRefreshClock();
+    }
+
+    function renderHero(sistema, estado) {
+      const badgeClass = estado.operativo === 'OPERANDO' ? 'operando' : 'critica';
+
+      return `
+        <section class="hero">
+          <div class="hero-main">
+            <div class="hero-content">
+              <div class="eyebrow">
+                <span class="pulse"></span>
+                Sistema en producción
+              </div>
+
+              <h1>Visión</h1>
+
+              <div class="subtitle">
+                ${escapeHtml(sistema.subtitulo || 'Centro Operativo Inteligente de Campus Virtual')}
+              </div>
+
+              <div class="hero-strip">
+                <span class="chip">Estado: <b>${escapeHtml(estado.operativo || '-')}</b></span>
+                <span class="chip">Telegram: <b>${estado.telegramActivo ? 'Activo' : 'Inactivo'}</b></span>
+                <span class="chip">Producción: <b>${estado.modoProduccion ? 'Activa' : 'No activa'}</b></span>
+                <span class="chip">Triggers: <b>${estado.triggersActivos || 0}</b></span>
+                <span class="chip">Próxima actualización: <b id="refreshCounter">${REFRESH_SECONDS} s</b></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-bot">
+            <div class="bot-wrap">
+              <img src="${BOT_IMG}" alt="Visión">
+            </div>
+
+            <div class="bot-caption">
+              <b>Visión está operando.</b><br>
+              Monitorea clases, detecta incidencias, envía alertas, mantiene bandeja y genera reporte diario.
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderStatusRow(sistema, estado) {
+      return `
+        <section class="status-row">
+          <div class="status-card">
+            <div class="status-label">Estado operativo</div>
+            <div class="status-value">${escapeHtml(estado.operativo || '-')}</div>
+            <div class="status-detail">${escapeHtml(estado.detalle || '')}</div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-label">Última actualización</div>
+            <div class="status-value">${escapeHtml(sistema.generadoEn || '-')}</div>
+            <div class="status-detail">Snapshot ejecutivo desde Apps Script.</div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-label">Modo producción</div>
+            <div class="status-value">${estado.modoProduccion ? 'ACTIVO' : 'INACTIVO'}</div>
+            <div class="status-detail">Alertas y reportes operativos habilitados.</div>
+          </div>
+
+          <div class="status-card">
+            <div class="status-label">Capa automática</div>
+            <div class="status-value">${estado.triggersActivos || 0} triggers</div>
+            <div class="status-detail">Monitoreo, panel, actualización horaria y reporte.</div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderKpis(k) {
+      const cards = [
+        ['Clases monitoreadas', k.clasesMonitoreadasHoy, 'Cobertura diaria del motor'],
+        ['Zoom activo', k.clasesConZoomActivoHoy, 'Clases activas al menos una vez'],
+        ['Eventos registrados', k.eventosRegistradosHoy, 'Trazabilidad operativa'],
+        ['Incidencias detectadas', k.incidenciasDetectadasHoy, 'Casos creados por Visión'],
+        ['Incidencias cerradas', k.incidenciasCerradasHoy, 'Normalizadas o resueltas'],
+        ['Pendientes bandeja', k.pendientesBandeja, 'Carga real de gestión'],
+        ['Críticas operativas', k.criticasOperativasAbiertas, 'Riesgo actual'],
+        ['Errores notificación', k.erroresNotificacionHoy, 'Telegram / reporte']
+      ];
+
+      return `
+        <section class="kpi-grid">
+          ${cards.map(c => `
+            <div class="kpi-card">
+              <div class="kpi-label">${escapeHtml(c[0])}</div>
+              <div class="kpi-value">${num(c[1])}</div>
+              <div class="kpi-note">${escapeHtml(c[2])}</div>
+            </div>
+          `).join('')}
+        </section>
+      `;
+    }
+
+    function renderMotor(motor) {
+      const clases = motor.clases || [];
+
+      return `
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Motor de monitoreo</h2>
+              <div class="panel-subtitle">
+                Último ciclo: ${escapeHtml(motor.timestamp || '-')} · 
+                Clases evaluadas: ${num(motor.clasesEvaluadasUltimoCiclo)} ·
+                Zoom live: ${num(motor.reunionesLiveZoomUltimoCiclo)}
+              </div>
+            </div>
+            <span class="badge ok">Automatizado</span>
+          </div>
+
+          <div class="panel-body">
+            ${
+              clases.length
+              ? `<div class="inc-list">${clases.slice(0, 8).map(renderClase).join('')}</div>`
+              : `<div class="empty">
+                  En este momento no hay clases activas en la última ventana del motor.
+                  <br>
+                  La operación diaria ya fue registrada en eventos, reporte e incidencias.
+                </div>`
+            }
+          </div>
+        </section>
+      `;
+    }
+
+    function renderClase(c) {
+      const cls = estadoClass(c.estado);
+
+      return `
+        <div class="inc-card ${cls}">
+          <div class="inc-top">
+            <div>
+              <div class="inc-title">${escapeHtml(c.sigla || '-')}</div>
+              <div class="inc-note">${escapeHtml(c.asignatura || '')} · ${escapeHtml(c.profesor || '')}</div>
+            </div>
+            <span class="badge ${cls}">${escapeHtml(c.estado || '-')}</span>
+          </div>
+
+          <div class="inc-meta">
+            <div><b>Horario:</b> ${escapeHtml(c.inicio || '-')} - ${escapeHtml(c.fin || '-')}</div>
+            <div><b>Zoom:</b> ${c.zoomActivo ? 'Activo' : 'No activo'}</div>
+            <div><b>Participantes:</b> ${num(c.participantes)}</div>
+            <div><b>Agendados:</b> ${num(c.agendados)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderBandeja(bandeja) {
+      const items = bandeja.items || [];
+      const resumen = bandeja.resumen || {};
+
+      return `
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Bandeja ejecutiva</h2>
+              <div class="panel-subtitle">
+                Pendientes: ${num(bandeja.total)} · Alta: ${num(resumen.alta)} · Observación: ${num(resumen.enObservacion)}
+              </div>
+            </div>
+            <span class="badge ${Number(bandeja.total || 0) > 0 ? 'alta' : 'ok'}">
+              ${Number(bandeja.total || 0) > 0 ? 'Con gestión' : 'Sin pendientes'}
+            </span>
+          </div>
+
+          <div class="panel-body">
+            ${
+              items.length
+              ? `<div class="inc-list">${items.map(renderIncidencia).join('')}</div>`
+              : `<div class="empty">No hay incidencias pendientes en bandeja.</div>`
+            }
+          </div>
+        </section>
+      `;
+    }
+
+    function renderIncidencia(x) {
+      const cls = prioridadClass(x.prioridad);
+
+      return `
+        <div class="inc-card ${cls}">
+          <div class="inc-top">
+            <div>
+              <div class="inc-title">${escapeHtml(x.sigla || '-')}</div>
+              <div class="inc-note">${escapeHtml(x.estadoDetectado || '')} · ${escapeHtml(x.asignatura || '')}</div>
+            </div>
+            <span class="badge ${cls}">${escapeHtml(x.prioridad || '-')}</span>
+          </div>
+
+          <div class="inc-meta">
+            <div><b>Profesor/a:</b> ${escapeHtml(x.profesor || '-')}</div>
+            <div><b>Horario:</b> ${escapeHtml(x.horario || '-')}</div>
+            <div><b>Participantes:</b> ${num(x.participantes)} / ${num(x.agendados)}</div>
+            <div><b>Responsable:</b> ${escapeHtml(x.responsable || '-')}</div>
+          </div>
+
+          <div class="inc-note">
+            ${escapeHtml(x.observacion || '')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderImpacto(impacto) {
+      const absorbidas = impacto.funcionesAbsorbidas || [];
+      const proximas = impacto.proximasAutomatizaciones || [];
+
+      return `
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2 class="panel-title">Impacto organizacional</h2>
+              <div class="panel-subtitle">
+                Visión ya absorbe funciones manuales repetitivas y abre camino para reducción progresiva de costos.
+              </div>
+            </div>
+            <span class="badge media">Estrategia</span>
+          </div>
+
+          <div class="panel-body">
+            <div class="function-grid">
+              <div class="function-card">
+                <h3>Funciones ya absorbidas</h3>
+                <div class="check-list">
+                  ${absorbidas.map(x => `
+                    <div class="check-item">
+                      <span class="check">✓</span>
+                      <span>${escapeHtml(x)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <div class="function-card next">
+                <h3>Próximas funciones absorbibles</h3>
+                <div class="check-list">
+                  ${proximas.map(x => `
+                    <div class="check-item">
+                      <span class="check">→</span>
+                      <span>${escapeHtml(x)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+
+                <div class="empty" style="margin-top:14px; text-align:left;">
+                  <b>Conclusión:</b><br>
+                  ${escapeHtml(impacto.conclusion || '')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function prioridadClass(p) {
+      const t = String(p || '').toUpperCase();
+      if (t === 'ALTA' || t === 'CRITICA') return 'alta';
+      if (t === 'BAJA') return 'baja';
+      return 'media';
+    }
+
+    function estadoClass(e) {
+      const t = String(e || '').toUpperCase();
+
+      if (t.includes('NORMAL') || t === 'FINALIZADA') return 'ok';
+      if (t.includes('BAJA')) return 'baja';
+      if (t.includes('NO_INICIADA') || t.includes('ANTICIPADA')) return 'alta';
+      if (t.includes('PROXIMA') || t.includes('VENTANA')) return 'media';
+
+      return 'media';
+    }
+
+    function num(v) {
+      const n = Number(v || 0);
+      return isNaN(n) ? '0' : String(n);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarVision);
+  </script>
+</body>
+</html>
