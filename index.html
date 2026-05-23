@@ -638,6 +638,7 @@
     function render(data) {
       const estado = data.estado || {};
       const k = data.kpis || {};
+      window.__visionKpis = k;
       const motor = data.motor || {};
       const bandeja = data.bandeja || {};
       const impacto = data.impacto || {};
@@ -757,6 +758,10 @@
 
     function renderMotor(motor) {
       const clases = motor.clases || [];
+      const k = window.__visionKpis || {};
+
+      const hayClasesEnVivo = clases.length > 0;
+      const clasesParaMostrar = hayClasesEnVivo ? clases : obtenerClaseDemoMotor_();
 
       return `
         <section class="panel">
@@ -769,24 +774,125 @@
                 Zoom live: ${num(motor.reunionesLiveZoomUltimoCiclo)}
               </div>
             </div>
-            <span class="badge ok">Automatizado</span>
+            <span class="badge ${hayClasesEnVivo ? 'ok' : 'media'}">
+              ${hayClasesEnVivo ? 'Automatizado' : 'Módulo demostrativo'}
+            </span>
           </div>
 
           <div class="panel-body">
             ${
-              clases.length
-              ? `<div class="inc-list">${clases.slice(0, 8).map(renderClase).join('')}</div>`
-              : `<div class="empty">
-                  En este momento no hay clases activas en la última ventana del motor.
-                  <br>
-                  La operación diaria ya fue registrada en eventos, reporte e incidencias.
-                </div>`
+              !hayClasesEnVivo
+              ? `
+                <div class="empty" style="text-align:left; margin-bottom:14px;">
+                  <b>Módulo demostrativo:</b><br>
+                  En este momento no hay clases activas en vivo. 
+                  Se muestra una simulación visual para evidenciar cómo Visión representa una clase cuando el motor detecta actividad real en Zoom.
+                </div>
+              `
+              : ''
+            }
+
+            <div class="inc-list">
+              ${clasesParaMostrar.slice(0, 8).map(c => renderClaseMotor(c, !hayClasesEnVivo)).join('')}
+            </div>
+
+            ${
+              !hayClasesEnVivo
+              ? `
+                <div class="empty" style="text-align:left; margin-top:14px;">
+                  <b>Actividad real registrada hoy:</b><br>
+                  Visión ya monitoreó <b>${num(k.clasesMonitoreadasHoy)}</b> clases, registró 
+                  <b>${num(k.eventosRegistradosHoy)}</b> eventos, envió 
+                  <b>${num(k.recordatoriosEnviadosHoy)}</b> recordatorios y detectó 
+                  <b>${num(k.incidenciasDetectadasHoy)}</b> incidencias.
+                </div>
+              `
+              : ''
             }
           </div>
         </section>
       `;
     }
 
+function obtenerClaseDemoMotor_() {
+  return [
+    {
+      sigla: '2026 EET CR FIS17',
+      programa: 'ANUAL',
+      asignatura: 'Física',
+      profesor: 'Profesor Alexis Henríquez',
+      fecha: '23/05/2026',
+      inicio: '10:45',
+      fin: '12:15',
+      meetingId: '89304922082',
+      zoomActivo: true,
+      participantes: 31,
+      agendados: 46,
+      estado: 'INICIADA_NORMAL',
+      severidad: 'NORMAL',
+      accionSugerida: 'MANTENER_MONITOREO',
+      observacion: 'Clase activa con participación dentro de rango esperado. Visión mantiene monitoreo automático.'
+    }
+  ];
+}
+
+function renderClaseMotor(c, esDemo) {
+  const cls = estadoClass(c.estado);
+
+  return `
+    <div class="inc-card ${cls}" style="${esDemo ? 'border-style:dashed;' : ''}">
+      <div class="inc-top">
+        <div>
+          <div class="inc-title">${escapeHtml(c.sigla || '-')}</div>
+          <div class="inc-note">${escapeHtml(c.asignatura || '')} · ${escapeHtml(c.profesor || '')}</div>
+        </div>
+
+        <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+          ${esDemo ? '<span class="badge media">DEMO</span>' : ''}
+          <span class="badge ${cls}">${escapeHtml(c.estado || '-')}</span>
+        </div>
+      </div>
+
+      <div class="inc-meta">
+        <div><b>Horario:</b> ${escapeHtml(c.inicio || '-')} - ${escapeHtml(c.fin || '-')}</div>
+        <div><b>Zoom:</b> ${c.zoomActivo ? 'Activo' : 'No activo'}</div>
+        <div><b>Participantes:</b> ${num(c.participantes)}</div>
+        <div><b>Agendados:</b> ${num(c.agendados)}</div>
+      </div>
+
+      ${renderMiniBarraParticipacion_(c.participantes, c.agendados)}
+
+      <div class="inc-note">
+        ${escapeHtml(c.observacion || '')}
+      </div>
+    </div>
+  `;
+}
+
+function renderMiniBarraParticipacion_(participantes, agendados) {
+  const p = Number(participantes || 0);
+  const a = Number(agendados || 0);
+  const pct = a > 0 ? Math.min(100, Math.round((p / a) * 100)) : 0;
+
+  return `
+    <div style="margin-top:12px;">
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748b; margin-bottom:5px;">
+        <span><b>Participación observada</b></span>
+        <span>${pct}%</span>
+      </div>
+
+      <div style="height:9px; border-radius:999px; background:#e6edf6; overflow:hidden;">
+        <div style="
+          width:${pct}%;
+          height:100%;
+          border-radius:999px;
+          background:linear-gradient(90deg, #1d7df2, #54b6ff);
+        "></div>
+      </div>
+    </div>
+  `;
+}
+    
     function renderClase(c) {
       const cls = estadoClass(c.estado);
 
