@@ -59,6 +59,357 @@
 
 @media(max-width:1240px){.kpi-grid{grid-template-columns:repeat(4,minmax(150px,1fr))}.hero{grid-template-columns:1fr}.hero-bot{min-height:auto;flex-direction:row;align-items:center}.bot-wrap{min-height:120px;flex:0 0 180px}.bot-wrap img{width:145px}.module-grid{grid-template-columns:repeat(2,minmax(220px,1fr))}}@media(max-width:920px){.status-row,.grid-main,.function-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,minmax(140px,1fr))}.vision-class-layout{grid-template-columns:1fr 120px;grid-template-areas:"title status" "subtitle donut" "leftmeta donut" "rightmeta donut" "progress progress" "note note"}.vision-class-title{font-size:21px}.vision-class-subtitle{font-size:15px}}@media(max-width:920px){.impl-health-intro,.impl-evidence,.impl-json-grid{grid-template-columns:1fr}.impl-summary-grid{grid-template-columns:repeat(2,minmax(130px,1fr))}}
 @media(max-width:640px){.impl-summary-grid{grid-template-columns:1fr}.shell{width:min(100% - 18px,1480px);padding-top:10px}.app-topbar{grid-template-columns:1fr}.topbar-actions{justify-content:flex-start}.hero-main{padding:20px}.kpi-grid{grid-template-columns:1fr}.inc-meta{grid-template-columns:1fr}.hero-bot{flex-direction:column}.vision-class-layout{grid-template-columns:1fr;grid-template-areas:"title" "subtitle" "status" "donut" "leftmeta" "rightmeta" "progress" "note"}.vision-class-status{justify-content:flex-start}.vision-class-donut{justify-items:start}.vision-class-time{display:grid;gap:8px}.module-grid{grid-template-columns:1fr}}
+
+/* ============================================================
+   v24 · Ajuste gerencial / operativo
+   ============================================================ */
+
+/* Mayor contraste en los chips superiores */
+.app-topbar .topbar-actions .badge{
+  background:rgba(255,255,255,.16);
+  color:#eaf6ff;
+  border-color:rgba(255,255,255,.22);
+  text-shadow:0 1px 1px rgba(0,0,0,.22);
+}
+.app-topbar .topbar-actions .badge.ok,
+.app-topbar .topbar-actions .badge.operando{
+  background:rgba(31,193,139,.22);
+  color:#d8fff0;
+  border-color:rgba(31,193,139,.42);
+}
+.app-topbar .topbar-actions .badge.media{
+  background:rgba(29,125,242,.24);
+  color:#e6f3ff;
+  border-color:rgba(84,182,255,.42);
+}
+.app-topbar .topbar-actions .badge.alta,
+.app-topbar .topbar-actions .badge.critica{
+  background:rgba(249,115,22,.24);
+  color:#fff3e8;
+  border-color:rgba(249,115,22,.42);
+}
+
+/* Parrilla compacta de clases */
+.class-compact-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:12px;
+}
+.vision-class-card.compact{
+  padding:13px;
+  border-left-width:6px;
+  border-radius:18px;
+}
+.vision-class-card.compact .vision-class-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 92px;
+  grid-template-areas:
+    "title donut"
+    "state donut"
+    "meta donut"
+    "details details";
+  gap:8px 12px;
+}
+.vision-class-card.compact .vision-class-title{
+  grid-area:title;
+  font-size:17px;
+  letter-spacing:-.02em;
+}
+.vision-class-card.compact .vision-class-status{
+  grid-area:state;
+  justify-content:flex-start;
+}
+.vision-class-card.compact .vision-class-donut{
+  grid-area:donut;
+  padding-top:0;
+}
+.vision-class-card.compact .vision-donut-box{
+  width:74px;
+}
+.vision-class-card.compact .vision-donut{
+  width:70px;
+  height:70px;
+}
+.vision-class-card.compact .vision-donut-center strong{
+  font-size:15px;
+}
+.class-mini-meta{
+  grid-area:meta;
+  display:grid;
+  gap:4px;
+  color:#334155;
+  font-size:12px;
+  line-height:1.25;
+}
+.class-mini-meta b{color:#061a32}
+.class-detail{
+  grid-area:details;
+  border-top:1px solid rgba(120,150,180,.22);
+  margin-top:5px;
+  padding-top:7px;
+}
+.class-detail summary{
+  cursor:pointer;
+  color:#0b4fa4;
+  font-size:12px;
+  font-weight:900;
+  user-select:none;
+}
+.class-detail-body{
+  margin-top:8px;
+  display:grid;
+  gap:8px;
+  color:#607186;
+  font-size:12px;
+  line-height:1.35;
+}
+.class-detail-body .vision-class-note{
+  border-top:0;
+  padding-top:0;
+  font-size:12px;
+}
+.class-detail-body .vision-class-time{
+  font-size:12px;
+  margin-bottom:4px;
+}
+.class-detail-body .vision-progress-track{height:10px}
+.class-detail-body .vision-progress-dot{width:13px;height:13px}
+
+/* Bandeja de gestión humana */
+.management-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:12px;
+}
+.management-card{
+  border:1px solid rgba(120,150,180,.22);
+  border-radius:18px;
+  background:#fff;
+  padding:14px;
+}
+.management-card h3{
+  margin:0 0 7px;
+  font-size:15px;
+  color:#061a32;
+}
+.management-card p{
+  margin:0 0 10px;
+  color:#607186;
+  font-size:12px;
+  line-height:1.4;
+}
+.management-actions{
+  display:grid;
+  gap:8px;
+  margin-top:10px;
+}
+.management-actions select,
+.management-actions textarea{
+  width:100%;
+  border:1px solid #cdd9e8;
+  border-radius:12px;
+  padding:9px 10px;
+  font-family:inherit;
+  color:#0b1f3a;
+  background:#fff;
+}
+.management-actions textarea{min-height:74px;resize:vertical}
+.management-actions button{
+  border:0;
+  border-radius:12px;
+  padding:10px 12px;
+  background:linear-gradient(135deg,#1d7df2,#54b6ff);
+  color:#fff;
+  font-weight:900;
+  cursor:pointer;
+}
+
+/* Recordatorios: mirror de Telegram y demos */
+.telegram-mirror{
+  background:#071426;
+  color:#dbeafe;
+  border-radius:18px;
+  padding:14px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.telegram-msg{
+  border-left:4px solid #54b6ff;
+  background:rgba(255,255,255,.06);
+  border-radius:12px;
+  padding:11px 12px;
+  margin:10px 0;
+  font-size:12px;
+  line-height:1.45;
+  white-space:pre-wrap;
+}
+.telegram-msg.alert{border-left-color:#f97316}
+.telegram-msg.critica{border-left-color:#e94242}
+.potential-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+}
+.potential-card{
+  border:1px solid rgba(120,150,180,.22);
+  border-radius:18px;
+  background:#fff;
+  padding:14px;
+}
+.potential-card h3{margin:0 0 7px;font-size:15px;color:#061a32}
+.potential-card p{margin:0;color:#607186;font-size:12px;line-height:1.45}
+.example-box{
+  margin-top:10px;
+  border:1px dashed rgba(29,125,242,.35);
+  background:rgba(29,125,242,.06);
+  border-radius:12px;
+  padding:10px;
+  font-size:11px;
+  color:#334155;
+  line-height:1.4;
+}
+
+/* Salud implementación: íconos de ruta */
+.impl-nodes.iconic{
+  grid-template-columns:repeat(auto-fit,minmax(82px,1fr));
+}
+.impl-dot.icon{
+  font-size:18px;
+  background:#aab7c5;
+}
+.impl-dot.icon.ok::after{
+  content:"✓";
+  position:absolute;
+  transform:translate(15px,-15px);
+  width:18px;height:18px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:#1fc18b;
+  color:white;
+  font-size:12px;
+  border:2px solid #fff;
+}
+.impl-dot.icon.error::after{
+  content:"×";
+  position:absolute;
+  transform:translate(15px,-15px);
+  width:18px;height:18px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  background:#e94242;
+  color:white;
+  font-size:12px;
+  border:2px solid #fff;
+}
+
+/* Timeline más robusto */
+.timeline-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+}
+.timeline-item.rich{
+  align-items:flex-start;
+  border:1px solid rgba(120,150,180,.22);
+  border-radius:18px;
+  padding:14px;
+  background:#fff;
+}
+.timeline-meta{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:8px;
+}
+.timeline-chip{
+  border-radius:999px;
+  background:#eef6ff;
+  color:#0b4fa4;
+  font-weight:900;
+  font-size:10px;
+  padding:5px 8px;
+}
+
+/* Reportes más gerenciales */
+.report-hero-grid{
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:14px;
+  margin-bottom:14px;
+}
+.report-story{
+  border:1px solid rgba(120,150,180,.22);
+  border-radius:18px;
+  background:#fff;
+  padding:16px;
+}
+.report-story h3{margin:0 0 8px;color:#061a32;font-size:16px}
+.report-story p{margin:0;color:#607186;font-size:13px;line-height:1.45}
+.report-chart{
+  border:1px solid rgba(120,150,180,.22);
+  border-radius:18px;
+  background:#fff;
+  padding:16px;
+}
+.chart-row{
+  display:grid;
+  grid-template-columns:150px 1fr 54px;
+  gap:10px;
+  align-items:center;
+  margin:10px 0;
+  font-size:12px;
+}
+.chart-label{font-weight:900;color:#061a32}
+.chart-track{height:13px;background:#e6edf6;border-radius:999px;overflow:hidden}
+.chart-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#1d7df2,#23c7b9)}
+.chart-value{text-align:right;font-weight:950;color:#083c72}
+.service-gauge-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+  margin-top:14px;
+}
+.service-gauge{
+  border:1px solid rgba(120,150,180,.22);
+  border-radius:18px;
+  background:#fff;
+  padding:14px;
+}
+.service-gauge .score{
+  font-size:28px;
+  font-weight:950;
+  color:#083c72;
+}
+.service-gauge small{display:block;color:#64748b;font-weight:800;margin-top:4px}
+
+/* Impacto organizacional más vendedor */
+.impact-exec{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-bottom:14px;
+}
+.impact-metric{
+  border:1px solid rgba(120,150,180,.22);
+  border-radius:18px;
+  background:#fff;
+  padding:14px;
+}
+.impact-metric .big{
+  font-size:28px;
+  font-weight:950;
+  color:#083c72;
+}
+.impact-metric p{
+  margin:5px 0 0;
+  color:#607186;
+  font-size:12px;
+  line-height:1.4;
+}
+@media(max-width:900px){
+  .report-hero-grid,.impact-exec{grid-template-columns:1fr}
+  .chart-row{grid-template-columns:110px 1fr 42px}
+}
+
 </style>
 </head>
 
@@ -204,50 +555,41 @@ function actualizarCargaVision_(pct){const p=Math.max(0,Math.min(100,Number(pct|
 function startRefreshClock(){if(refreshTimer)clearInterval(refreshTimer);refreshTimer=setInterval(()=>{refreshLeft--;const el=document.getElementById('refreshCounter');if(el)el.textContent=refreshLeft+' s';if(refreshLeft<=0){cargarVision();refreshLeft=REFRESH_SECONDS}},1000)}
 function setView(id){currentView=id;renderShell()}
 function renderShell(){const d=visionData||{},estado=d.estado||{},sistema=d.sistema||{};document.getElementById('app').className='';document.getElementById('app').innerHTML=`${renderTopbar(sistema,estado)}${renderRibbon()}${renderCurrentView()}`;startRefreshClock();startClassClock();actualizarRelojesClase_()}
-function renderTopbar(s,e){return `<section class="app-topbar"><div class="brand"><img src="${BOT_IMG}" alt="Visión"><div><div class="brand-title">Visión | Centro Operativo Inteligente</div><div class="brand-subtitle">${escapeHtml(s.subtitulo||'Monitoreo, trazabilidad y automatización operativa de Campus Virtual')}</div></div></div><div class="topbar-actions"><span class="badge ${e.operativo==='OPERANDO'?'ok':'critica'}">${escapeHtml(e.operativo||'-')}</span><span class="badge media">Actualiza en <b id="refreshCounter" style="margin-left:4px;">${REFRESH_SECONDS} s</b></span><span class="badge ${e.modoProduccion?'ok':'alta'}">Producción ${e.modoProduccion?'activa':'inactiva'}</span></div></section>`}
+function renderTopbar(s,e){return `<section class="app-topbar"><div class="brand"><img src="${BOT_IMG}" alt="Visión"><div><div class="brand-title">Visión | Centro Operativo Inteligente</div><div class="brand-subtitle">${escapeHtml(s.subtitulo||'Monitoreo, trazabilidad y automatización operativa de Campus Virtual')}</div></div></div><div class="topbar-actions"><span class="badge ${e.operativo==='OPERANDO'?'ok':'critica'}">${escapeHtml(e.operativo||'-')}</span><span class="badge media">Actualiza en <b id="refreshCounter" style="margin-left:4px;">${REFRESH_SECONDS} s</b></span><span class="badge ${e.modoProduccion?'ok':'alta'}">${e.modoProduccion?'Producción activa':'Producción inactiva'}</span></div></section>`}
 function renderRibbon(){return `<nav class="ribbon">${VIEWS.map(v=>`<button type="button" class="${currentView===v[0]?'active':''}" onclick="setView('${v[0]}')">${escapeHtml(v[1])}</button>`).join('')}</nav>`}
 function renderCurrentView(){const d=visionData||{};if(currentView==='monitoreo')return renderVistaMonitoreo(d);if(currentView==='bandeja')return renderVistaBandeja(d);if(currentView==='recordatorios')return renderVistaRecordatorios(d);if(currentView==='salud')return renderVistaSalud(d);if(currentView==='timeline')return renderVistaTimeline(d);if(currentView==='reportes')return renderVistaReportes(d);return renderVistaInicio(d)}
 function renderVistaInicio(d){const e=d.estado||{},s=d.sistema||{},k=d.kpis||{},m=d.motor||{},b=d.bandeja||{},i=d.impacto||{};window.__visionKpis=k;return `${renderHero(s,e)}${renderStatusRow(s,e)}${renderKpis(k)}<div class="grid-main">${renderMotor(m)}${renderBandeja(b)}</div>${renderImpacto(i)}`}
 function renderVistaMonitoreo(d){const k=d.kpis||{};window.__visionKpis=k;return `<div class="grid-main">${renderMotor(d.motor||{})}<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Lectura del monitoreo</h2><div class="panel-subtitle">Vista operativa del motor de clases en vivo.</div></div><span class="badge ok">En línea</span></div><div class="panel-body"><div class="module-grid" style="grid-template-columns:1fr;"><div class="module-card"><h3>Clases monitoreadas hoy</h3><div class="big">${num(k.clasesMonitoreadasHoy)}</div><p>Cobertura diaria procesada por Visión.</p></div><div class="module-card"><h3>Zoom activo detectado</h3><div class="big">${num(k.clasesConZoomActivoHoy)}</div><p>Clases con actividad Zoom observada durante la jornada.</p></div><div class="module-card"><h3>Eventos registrados</h3><div class="big">${num(k.eventosRegistradosHoy)}</div><p>Trazabilidad de estados generada automáticamente.</p></div></div></div></section></div>`}
 function renderVistaBandeja(d){return `<div class="grid-main">${renderBandeja(d.bandeja||{})}<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Criterio de gestión</h2><div class="panel-subtitle">Priorización ejecutiva para resolver o escalar.</div></div><span class="badge media">Gestión</span></div><div class="panel-body"><div class="check-list"><div class="check-item"><span class="check">1</span><span>Revisar primero incidencias de prioridad alta.</span></div><div class="check-item"><span class="check">2</span><span>Registrar acción tomada antes de cerrar una incidencia.</span></div><div class="check-item"><span class="check">3</span><span>Escalar solo cuando existe impacto de servicio o recurrencia.</span></div><div class="check-item"><span class="check">4</span><span>Dejar trazabilidad para reporte diario y revisión semanal.</span></div></div></div></section></div>`}
-function renderVistaRecordatorios(d){const k=d.kpis||{};return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Recordatorios inteligentes</h2><div class="panel-subtitle">Comunicación preventiva para clases, profesores y estudiantes agendados.</div></div><span class="badge media">Próxima iteración</span></div><div class="panel-body"><div class="module-grid"><div class="module-card"><h3>Telegram interno</h3><span class="badge ok">Implementado</span><div class="big">${num(k.recordatoriosEnviadosHoy)}</div><p>Recordatorios automáticos internos ya operativos.</p></div><div class="module-card"><h3>Mailing a profesores</h3><span class="badge media">Recomendado</span><p>Canal base de bajo costo para recordar clase, horario, curso y link operativo.</p></div><div class="module-card"><h3>Mailing a estudiantes</h3><span class="badge media">Recomendado</span><p>Envío a estudiantes agendados, similar a ejercitación diaria o pases.</p></div><div class="module-card"><h3>WhatsApp profesores</h3><span class="badge alta">Opcional</span><p>Uso acotado para profesores o casos críticos. Evita gasto masivo.</p></div><div class="module-card"><h3>Timeline de envío</h3><span class="badge media">Diseñado</span><p>Cada recordatorio debería quedar registrado como evento conversacional de Visión.</p></div><div class="module-card"><h3>Trazabilidad</h3><span class="badge media">Diseñado</span><p>Estado de envío, errores, destinatarios, aperturas/clics si aplica.</p></div></div></div></section>`}
-function renderVistaSalud(){return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Salud de cursos</h2><div class="panel-subtitle">Vista técnica para detectar problemas de configuración antes de que sean incidencias.</div></div><span class="badge media">Diseño funcional</span></div><div class="panel-body"><div class="module-grid"><div class="module-card"><h3>Cursos sin link Zoom</h3><p>Detección de cursos en funcionamiento con campo de acceso incompleto.</p></div><div class="module-card"><h3>Cursos sin profesor</h3><p>Validación de programación académica incompleta.</p></div><div class="module-card"><h3>Cursos sin agendados</h3><p>Diferenciar cursos sin demanda, cursos GO y errores de fuente.</p></div><div class="module-card"><h3>Modelo GO</h3><p>Tratamiento separado para cursos satélite con participación observada.</p></div><div class="module-card"><h3>Horarios inconsistentes</h3><p>Revisión de inicio, término, ventanas y cruces de día.</p></div><div class="module-card"><h3>Fórmulas / fuentes</h3><p>Control de agendados, LOG_ZOOM, CURSOS y observaciones.</p></div></div></div></section>${renderSaludImplementacionMoodle()}`}
-function renderSaludImplementacionMoodle(){return `<section class="panel" id="implHealthPanel"><div class="panel-header"><div><h2 class="panel-title">Salud de Implementación Moodle</h2><div class="panel-subtitle">Consulta puntual por sigla. Visión compara CURSOS contra Moodle/API y entrega evidencia por nodo.</div></div><span class="badge media">Diagnóstico bajo demanda</span></div><div class="panel-body"><div class="impl-health-intro"><div class="impl-health-card"><h3>Consulta de salud</h3><p>Ingrese una sigla de curso para verificar curso Moodle, grupo, cohorte, asistencia, restricciones, Zoom y profesor.</p><div class="impl-search"><input id="implSiglaInput" value="2026 EET CR LEN01" placeholder="Ej: 2026 EET CR LEN01"><button id="implRunBtn" type="button" onclick="runImplementationHealthCheck()">Verificar</button></div><div id="implStatus" class="impl-status">Listo para verificar. La consulta se ejecuta contra Apps Script y Moodle/API.</div></div><div class="impl-health-card"><h3>Lectura esperada</h3><p>El robot Visión avanza sobre la ruta mientras se consulta el backend. Al finalizar, se muestra una matriz: <b>esperado desde CURSOS</b> versus <b>capturado desde Moodle/API</b>.</p></div></div><div class="impl-route"><div class="impl-line-wrap"><div class="impl-line"><div id="implProgressFill" class="impl-line-fill"></div><img id="implRobot" class="impl-robot" src="${BOT_IMG}" alt="Visión"></div><div id="implNodes" class="impl-nodes">${renderImplementationPlaceholderNodes()}</div></div></div><div class="impl-summary-grid"><div class="impl-summary-box"><span id="implPercent" class="big">0%</span><small>verificación</small></div><div class="impl-summary-box"><span id="implOk" class="big">0</span><small>OK</small></div><div class="impl-summary-box"><span id="implBrechas" class="big">0</span><small>brechas</small></div><div class="impl-summary-box"><span id="implPendientes" class="big">0</span><small>pendientes</small></div></div><div id="implEvidence" class="impl-evidence"></div><div id="implTable" class="impl-table-wrap"></div><div id="implJsonGrid" class="impl-json-grid"></div></div></section>`}
-function renderImplementationPlaceholderNodes(){const nodes=['CURSOS','Curso','Grupo','Cohorte','Asistencia','Rest. asist.','Zoom','HTML','Rest. Zoom','Profesor','Regla'];return nodes.map(n=>`<div class="impl-node"><div class="impl-dot pending">○</div><div>${escapeHtml(n)}</div></div>`).join('')}
-function renderVistaTimeline(d){const k=d.kpis||{},items=((d.bandeja||{}).items||[]);return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Timeline operativo</h2><div class="panel-subtitle">Bitácora conversacional de acciones, alertas, recordatorios e incidencias.</div></div><span class="badge media">Prototipo</span></div><div class="panel-body"><div class="timeline"><div class="timeline-item"><div class="timeline-icon">V</div><div><div class="timeline-title">Snapshot ejecutivo actualizado</div><div class="timeline-text">Visión consolidó KPIs diarios, bandeja ejecutiva, estado operativo e impacto organizacional.</div></div></div><div class="timeline-item"><div class="timeline-icon">🔔</div><div><div class="timeline-title">Recordatorios procesados</div><div class="timeline-text">Recordatorios internos enviados hoy: ${num(k.recordatoriosEnviadosHoy)}.</div></div></div><div class="timeline-item"><div class="timeline-icon">⚠</div><div><div class="timeline-title">Incidencias detectadas</div><div class="timeline-text">Incidencias detectadas hoy: ${num(k.incidenciasDetectadasHoy)}. Pendientes actuales: ${num(k.pendientesBandeja)}.</div></div></div>${items.slice(0,3).map(x=>`<div class="timeline-item"><div class="timeline-icon">!</div><div><div class="timeline-title">${escapeHtml(x.sigla||'-')} · ${escapeHtml(x.estadoDetectado||'')}</div><div class="timeline-text">${escapeHtml(x.observacion||'')}</div></div></div>`).join('')}</div></div></section>`}
-function renderVistaReportes(d){const k=d.kpis||{},s=d.sistema||{};return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Reportes</h2><div class="panel-subtitle">Snapshot vivo para operación diaria y base para reportería diaria/semanal.</div></div><span class="badge ok">Disponible</span></div><div class="panel-body"><div class="module-grid"><div class="module-card"><h3>Reporte diario</h3><span class="badge ok">Operativo</span><p>Último snapshot: ${escapeHtml(s.generadoEn||'-')}</p></div><div class="module-card"><h3>Clases monitoreadas</h3><div class="big">${num(k.clasesMonitoreadasHoy)}</div><p>Cobertura diaria registrada.</p></div><div class="module-card"><h3>Incidencias detectadas</h3><div class="big">${num(k.incidenciasDetectadasHoy)}</div><p>Casos creados automáticamente.</p></div><div class="module-card"><h3>Incidencias cerradas</h3><div class="big">${num(k.incidenciasCerradasHoy)}</div><p>Cierres normalizados o resueltos.</p></div><div class="module-card"><h3>Reporte semanal</h3><span class="badge media">Próxima iteración</span><p>Tendencias por programa, asignatura, profesor y tipo de incidencia.</p></div><div class="module-card"><h3>Impacto organizacional</h3><span class="badge media">Próxima iteración</span><p>Horas humanas absorbidas, consultas evitadas y costo operativo reducido.</p></div></div></div></section>`}
+function renderVistaRecordatorios(d){const k=d.kpis||{};return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Recordatorios inteligentes</h2><div class="panel-subtitle">Mirror operativo de comunicaciones preventivas y potencialidades de automatización.</div></div><span class="badge ok">Telegram operativo</span></div><div class="panel-body"><div class="report-hero-grid"><div class="telegram-mirror"><h3 style="margin:0 0 8px;color:#eaf6ff;">Mirror Telegram interno</h3><div class="telegram-msg">🔔 Visión recuerda una clase próxima a iniciar\nClase: 2026 EET CR LEN01\nHorario: 10:45 - 12:15\nAcción sugerida: iniciar o verificar sala Zoom a tiempo.</div><div class="telegram-msg alert">🟠 Visión detectó una incidencia\nEstado: NO_INICIADA_T2\nAcción sugerida: AVISAR_PROFESOR\nSe deja trazabilidad sin mostrar Telegram personal.</div><div class="telegram-msg critica">🔴 Incidencia crítica\nEstado: NO_INICIADA_T5\nResponsable sugerido: Ingrid / Campus Virtual\nRequiere revisión operativa.</div></div><div class="report-story"><h3>Por qué esto importa</h3><p>El mirror permite mostrar al gerente la trazabilidad de Visión sin abrir Telegram personal ni exponer conversaciones privadas. La plataforma se transforma en vitrina operativa y evidencia de servicio.</p><div class="service-gauge-grid"><div class="service-gauge"><div class="score">${num(k.recordatoriosEnviadosHoy)}</div><small>recordatorios enviados hoy</small></div><div class="service-gauge"><div class="score">${num(k.alertasIncidenciaHoy||k.incidenciasDetectadasHoy)}</div><small>alertas o incidencias del día</small></div></div></div></div><div class="potential-grid"><div class="potential-card"><h3>Mailing a profesores</h3><span class="badge media">Potencial</span><p>Recordatorio automático con horario, curso y link operativo.</p><div class="example-box"><b>Ejemplo:</b> “Profesor/a, hoy tiene clase 2026 EET CR MAT01 a las 09:00. Verifique sala Zoom antes del inicio.”</div></div><div class="potential-card"><h3>Mailing a estudiantes</h3><span class="badge media">Potencial</span><p>Comunicación previa a estudiantes agendados, útil si la clase cambia de sala o requiere recuperación.</p><div class="example-box"><b>Ejemplo:</b> “Tu clase inicia pronto. Marca asistencia en Moodle y luego ingresa al recurso Zoom habilitado.”</div></div><div class="potential-card"><h3>WhatsApp profesores</h3><span class="badge alta">Uso acotado</span><p>Canal reservado para incidencias críticas, evitando gasto masivo.</p><div class="example-box"><b>Ejemplo:</b> “Visión no detecta inicio de sala. Favor confirmar estado de la clase.”</div></div><div class="potential-card"><h3>Trazabilidad</h3><span class="badge ok">Clave gerencial</span><p>Cada comunicación queda como evento operacional: enviado, omitido por antiduplicado, error o gestionado.</p></div></div></div></section>`}
+function renderVistaSalud(){return `${renderSaludImplementacionMoodle()}<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Salud preventiva de cursos</h2><div class="panel-subtitle">Diseño funcional posterior: controles masivos para anticipar brechas antes de que sean incidencias.</div></div><span class="badge media">Diseño funcional</span></div><div class="panel-body"><div class="module-grid"><div class="module-card"><h3>Cursos sin link Zoom</h3><p>Detección de cursos en funcionamiento con campo de acceso incompleto.</p></div><div class="module-card"><h3>Cursos sin profesor</h3><p>Validación de programación académica incompleta.</p></div><div class="module-card"><h3>Cursos sin agendados</h3><p>Diferenciar cursos sin demanda, cursos GO y errores de fuente.</p></div><div class="module-card"><h3>Modelo GO</h3><p>Tratamiento separado para cursos satélite con participación observada.</p></div><div class="module-card"><h3>Horarios inconsistentes</h3><p>Revisión de inicio, término, ventanas y cruces de día.</p></div><div class="module-card"><h3>Fórmulas / fuentes</h3><p>Control de agendados, LOG_ZOOM, CURSOS y observaciones.</p></div></div></div></section>`}
+function renderSaludImplementacionMoodle(){return `<section class="panel" id="implHealthPanel"><div class="panel-header"><div><h2 class="panel-title">Salud de Implementación Moodle</h2><div class="panel-subtitle">Consulta puntual por sigla. Visión compara CURSOS contra Moodle/API y entrega evidencia por nodo.</div></div><span class="badge media">Diagnóstico bajo demanda</span></div><div class="panel-body"><div class="impl-health-intro"><div class="impl-health-card"><h3>Consulta de salud</h3><p>Ingrese una sigla de curso para verificar curso Moodle, grupo, cohorte, asistencia, restricciones, Zoom y profesor.</p><div class="impl-search"><input id="implSiglaInput" value="2026 EET CR LEN01" placeholder="Ej: 2026 EET CR LEN01"><button id="implRunBtn" type="button" onclick="runImplementationHealthCheck()">Verificar</button></div><div id="implStatus" class="impl-status">Listo para verificar. La consulta se ejecuta contra Apps Script y Moodle/API.</div></div><div class="impl-health-card"><h3>Lectura esperada</h3><p>El robot Visión avanza paso a paso por cada nodo de verificación. Al finalizar, cada nodo queda con check verde, cruz roja u observación según la matriz: <b>esperado desde CURSOS</b> versus <b>capturado desde Moodle/API</b>.</p></div></div><div class="impl-route"><div class="impl-line-wrap"><div class="impl-line"><div id="implProgressFill" class="impl-line-fill"></div><img id="implRobot" class="impl-robot" src="${BOT_IMG}" alt="Visión"></div><div id="implNodes" class="impl-nodes">${renderImplementationPlaceholderNodes()}</div></div></div><div class="impl-summary-grid"><div class="impl-summary-box"><span id="implPercent" class="big">0%</span><small>verificación</small></div><div class="impl-summary-box"><span id="implOk" class="big">0</span><small>OK</small></div><div class="impl-summary-box"><span id="implBrechas" class="big">0</span><small>brechas</small></div><div class="impl-summary-box"><span id="implPendientes" class="big">0</span><small>pendientes</small></div></div><div id="implEvidence" class="impl-evidence"></div><div id="implTable" class="impl-table-wrap"></div><div id="implJsonGrid" class="impl-json-grid"></div></div></section>`}
+function renderImplementationPlaceholderNodes(){const nodes=implNodeCatalog_();return nodes.map(n=>`<div class="impl-node"><div class="impl-dot icon pending">${n.icon}</div><div>${escapeHtml(n.short)}</div></div>`).join('')}
+function renderVistaTimeline(d){const k=d.kpis||{},items=((d.bandeja||{}).items||[]);const base=[{icon:'🤖',title:'Snapshot vivo actualizado',text:'Visión consolidó operación viva desde eventos, incidencias, recordatorios y bandeja.',meta:['fuente viva','no depende del cierre diario']},{icon:'🔔',title:'Recordatorios procesados',text:`Recordatorios internos enviados hoy: ${num(k.recordatoriosEnviadosHoy)}.`,meta:['Telegram','antiduplicado']},{icon:'⚠️',title:'Incidencias detectadas',text:`Incidencias detectadas hoy: ${num(k.incidenciasDetectadasHoy)}. Pendientes actuales: ${num(k.pendientesBandeja)}.`,meta:['priorización','trazabilidad']},{icon:'✅',title:'Cierres normalizados',text:`Incidencias cerradas o normalizadas hoy: ${num(k.incidenciasCerradasHoy)}.`,meta:['seguimiento','auditoría']}];const demo=[{icon:'🟠',title:'Ejemplo · NO_INICIADA_T2',text:'Visión detecta que una sala no inició a tiempo y sugiere avisar al profesor.',meta:['demo','operación preventiva']},{icon:'🔴',title:'Ejemplo · NO_INICIADA_T5',text:'Visión escala a crítica cuando pasan más minutos sin evidencia de inicio.',meta:['demo','escalamiento']},{icon:'📊',title:'Ejemplo · Reporte gerencial',text:'Los eventos alimentan reportes de salud del servicio, suspensiones, retrasos y recurrencias.',meta:['demo','gerencia']}];const extra=items.slice(0,4).map(x=>({icon:'!',title:`${x.sigla||'-'} · ${x.estadoDetectado||''}`,text:x.observacion||'',meta:[x.prioridad||'',x.responsable||''].filter(Boolean)}));const all=[...base,...extra,...demo];return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Timeline operativo</h2><div class="panel-subtitle">Bitácora conversacional: lo que Visión observa, notifica, escala y deja como evidencia.</div></div><span class="badge media">Demo ejecutiva</span></div><div class="panel-body"><div class="timeline-grid">${all.map(x=>`<div class="timeline-item rich"><div class="timeline-icon">${x.icon}</div><div><div class="timeline-title">${escapeHtml(x.title)}</div><div class="timeline-text">${escapeHtml(x.text)}</div><div class="timeline-meta">${(x.meta||[]).map(m=>`<span class="timeline-chip">${escapeHtml(m)}</span>`).join('')}</div></div></div>`).join('')}</div></div></section>`}
+function renderVistaReportes(d){const k=d.kpis||{},s=d.sistema||{};const mon=Number(k.clasesMonitoreadasHoy||0),zoom=Number(k.clasesConZoomActivoHoy||0),inc=Number(k.incidenciasDetectadasHoy||0),cerr=Number(k.incidenciasCerradasHoy||0),ev=Number(k.eventosRegistradosHoy||0);const pctZoom=mon?Math.round(zoom/mon*100):0;const pctCierre=inc?Math.round(cerr/inc*100):0;const salud=Math.max(0,Math.min(100,Math.round(100-(inc/Math.max(mon,1))*35)));return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Reportes ejecutivos</h2><div class="panel-subtitle">Lectura gerencial de salud del servicio, continuidad de clases y trazabilidad operacional.</div></div><span class="badge ok">Disponible</span></div><div class="panel-body"><div class="report-hero-grid"><div class="report-story"><h3>Historia que Visión ya puede contar</h3><p>Visión permite mostrar si las clases se están realizando, cuántas incidencias aparecen, cuánto se cierra automáticamente y dónde conviene pedir explicaciones operativas. Esta vista debe defender al área con datos, no con percepciones.</p><div class="service-gauge-grid"><div class="service-gauge"><div class="score">${num(salud)}%</div><small>índice visual de salud diaria</small></div><div class="service-gauge"><div class="score">${num(pctZoom)}%</div><small>cobertura Zoom observada</small></div><div class="service-gauge"><div class="score">${num(pctCierre)}%</div><small>cierre / normalización</small></div></div></div><div class="report-chart"><h3 style="margin:0 0 8px;">Indicadores del día</h3>${barRow_('Clases monitoreadas',mon,Math.max(mon,1))}${barRow_('Zoom activo',zoom,Math.max(mon,zoom,1))}${barRow_('Eventos registrados',ev,Math.max(ev,1))}${barRow_('Incidencias detectadas',inc,Math.max(mon,inc,1))}${barRow_('Incidencias cerradas',cerr,Math.max(inc,cerr,1))}</div></div><div class="module-grid"><div class="module-card"><h3>Reporte diario</h3><span class="badge ok">Operativo</span><p>Último snapshot: ${escapeHtml(s.generadoEn||'-')}</p></div><div class="module-card"><h3>Reporte de suspensiones / no inicio</h3><span class="badge media">Gerencial</span><p>Permite responder con evidencia cuando se critique continuidad o cumplimiento de clases.</p></div><div class="module-card"><h3>Reporte por profesor / asignatura</h3><span class="badge media">Próxima iteración</span><p>Tendencias por recurrencia, horario, asignatura, profesor y tipo de incidencia.</p></div><div class="module-card"><h3>Impacto organizacional</h3><span class="badge media">Estrategia</span><p>Horas humanas absorbidas, consultas evitadas y costo operativo reducido.</p></div></div></div></section>`}
+
+function barRow_(label,value,max){
+  const pct=Math.max(4,Math.min(100,Math.round((Number(value||0)/Math.max(Number(max||1),1))*100)));
+  return `<div class="chart-row"><div class="chart-label">${escapeHtml(label)}</div><div class="chart-track"><div class="chart-fill" style="width:${pct}%"></div></div><div class="chart-value">${num(value)}</div></div>`;
+}
+
 function renderHero(s,e){return `<section class="hero"><div class="hero-main"><div class="hero-content"><div class="eyebrow"><span class="pulse"></span>Sistema en producción</div><h1>Visión</h1><div class="subtitle">${escapeHtml(s.subtitulo||'Centro Operativo Inteligente de Campus Virtual')}</div><div class="hero-strip"><span class="chip">Estado: <b>${escapeHtml(e.operativo||'-')}</b></span><span class="chip">Telegram: <b>${e.telegramActivo?'Activo':'Inactivo'}</b></span><span class="chip">Producción: <b>${e.modoProduccion?'Activa':'No activa'}</b></span><span class="chip">Triggers: <b>${e.triggersActivos||0}</b></span><span class="chip">Próxima actualización: <b id="refreshCounter">${REFRESH_SECONDS} s</b></span></div></div></div><div class="hero-bot"><div class="bot-wrap"><img src="${BOT_IMG}" alt="Visión"></div><div class="bot-caption"><b>Visión está operando.</b><br>Monitorea clases, detecta incidencias, envía alertas, mantiene bandeja y genera reporte diario.</div></div></section>`}
-function renderStatusRow(s,e){return `<section class="status-row"><div class="status-card"><div class="status-label">Estado operativo</div><div class="status-value">${escapeHtml(e.operativo||'-')}</div><div class="status-detail">${escapeHtml(e.detalle||'')}</div></div><div class="status-card"><div class="status-label">Última actualización</div><div class="status-value">${escapeHtml(s.generadoEn||'-')}</div><div class="status-detail">Snapshot ejecutivo desde Apps Script.</div></div><div class="status-card"><div class="status-label">Modo producción</div><div class="status-value">${e.modoProduccion?'ACTIVO':'INACTIVO'}</div><div class="status-detail">Alertas y reportes operativos habilitados.</div></div><div class="status-card"><div class="status-label">Capa automática</div><div class="status-value">${e.triggersActivos||0} triggers</div><div class="status-detail">Monitoreo, panel, actualización horaria y reporte.</div></div></section>`}
+function renderStatusRow(s,e){return `<section class="status-row"><div class="status-card"><div class="status-label">Estado operativo</div><div class="status-value">${escapeHtml(e.operativo||'-')}</div><div class="status-detail">${escapeHtml(e.detalle||'')}</div></div><div class="status-card"><div class="status-label">Última actualización</div><div class="status-value">${escapeHtml(s.generadoEn||'-')}</div><div class="status-detail">Snapshot vivo desde Apps Script.</div></div><div class="status-card"><div class="status-label">Modo producción</div><div class="status-value">${e.modoProduccion?'ACTIVO':'INACTIVO'}</div><div class="status-detail">Alertas y reportes operativos habilitados.</div></div><div class="status-card"><div class="status-label">Capa automática</div><div class="status-value">${e.triggersActivos||0} triggers</div><div class="status-detail">Monitoreo, panel, actualización horaria y reporte.</div></div></section>`}
 function renderKpis(k){const cards=[['Clases monitoreadas',k.clasesMonitoreadasHoy,'Cobertura diaria del motor'],['Zoom activo',k.clasesConZoomActivoHoy,'Clases activas al menos una vez'],['Eventos registrados',k.eventosRegistradosHoy,'Trazabilidad operativa'],['Incidencias detectadas',k.incidenciasDetectadasHoy,'Casos creados por Visión'],['Incidencias cerradas',k.incidenciasCerradasHoy,'Normalizadas o resueltas'],['Pendientes bandeja',k.pendientesBandeja,'Carga real de gestión'],['Críticas operativas',k.criticasOperativasAbiertas,'Riesgo actual'],['Errores notificación',k.erroresNotificacionHoy,'Telegram / reporte']];return `<section class="kpi-grid">${cards.map(c=>`<div class="kpi-card"><div class="kpi-label">${escapeHtml(c[0])}</div><div class="kpi-value">${num(c[1])}</div><div class="kpi-note">${escapeHtml(c[2])}</div></div>`).join('')}</section>`}
-function renderMotor(m){const clases=m.clases||[],k=window.__visionKpis||{},live=clases.length>0,show=live?clases:obtenerClaseDemoMotor_();return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Motor de monitoreo</h2><div class="panel-subtitle">Último ciclo: ${escapeHtml(m.timestamp||'-')} · Clases evaluadas: ${num(m.clasesEvaluadasUltimoCiclo)} · Zoom live: ${num(m.reunionesLiveZoomUltimoCiclo)}</div></div><span class="badge ${live?'ok':'media'}">${live?'Automatizado':'Módulo demostrativo'}</span></div><div class="panel-body">${!live?`<div class="empty" style="text-align:left;margin-bottom:14px;"><b>Módulo demostrativo:</b><br>En este momento no hay clases activas en vivo. Se muestra una simulación visual para evidenciar cómo Visión representa una clase cuando el motor detecta actividad real en Zoom.</div>`:''}<div class="inc-list">${show.slice(0,8).map(c=>renderClaseMotor(c,!live)).join('')}</div>${!live?`<div class="empty" style="text-align:left;margin-top:14px;"><b>Actividad real registrada hoy:</b><br>Visión ya monitoreó <b>${num(k.clasesMonitoreadasHoy)}</b> clases, registró <b>${num(k.eventosRegistradosHoy)}</b> eventos, envió <b>${num(k.recordatoriosEnviadosHoy)}</b> recordatorios y detectó <b>${num(k.incidenciasDetectadasHoy)}</b> incidencias.</div>`:''}</div></section>`}
+function renderMotor(m){const clases=m.clases||[],k=window.__visionKpis||{},live=clases.length>0,show=live?clases:obtenerClaseDemoMotor_();return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Motor de monitoreo</h2><div class="panel-subtitle">Último ciclo: ${escapeHtml(m.timestamp||'-')} · Clases evaluadas: ${num(m.clasesEvaluadasUltimoCiclo)} · Zoom live: ${num(m.reunionesLiveZoomUltimoCiclo)}</div></div><span class="badge ${live?'ok':'media'}">${live?'Automatizado':'Módulo demostrativo'}</span></div><div class="panel-body">${!live?`<div class="empty" style="text-align:left;margin-bottom:14px;"><b>Módulo demostrativo:</b><br>En este momento no hay clases activas en vivo. Se muestra una simulación visual para evidenciar cómo Visión representa una clase cuando el motor detecta actividad real en Zoom.</div>`:''}<div class="class-compact-grid">${show.slice(0,12).map(c=>renderClaseMotor(c,!live)).join('')}</div>${show.length>12?`<div class="empty" style="text-align:left;margin-top:14px;">Se muestran las primeras 12 clases del ciclo para evitar scroll excesivo. El detalle completo queda disponible en la fuente viva.</div>`:''}${!live?`<div class="empty" style="text-align:left;margin-top:14px;"><b>Actividad real registrada hoy:</b><br>Visión ya monitoreó <b>${num(k.clasesMonitoreadasHoy)}</b> clases, registró <b>${num(k.eventosRegistradosHoy)}</b> eventos, envió <b>${num(k.recordatoriosEnviadosHoy)}</b> recordatorios y detectó <b>${num(k.incidenciasDetectadasHoy)}</b> incidencias.</div>`:''}</div></section>`}
 function obtenerClaseDemoMotor_(){const now=new Date(),ini=new Date(now.getTime()-38*60000),fin=new Date(ini.getTime()+90*60000);return[{sigla:'2026 EET CR FIS17',programa:'ANUAL',asignatura:'Física',profesor:'Profesor Alexis Henríquez',fecha:formatearFechaDemo_(now),inicio:formatearHoraDemo_(ini),fin:formatearHoraDemo_(fin),inicioMsDemo:ini.getTime(),finMsDemo:fin.getTime(),meetingId:'89304922082',zoomActivo:true,participantes:31,agendados:46,estado:'INICIADA_NORMAL',severidad:'NORMAL',accionSugerida:'MANTENER_MONITOREO',observacion:'Clase activa con participación dentro de rango esperado. Visión mantiene monitoreo automático.'}]}
-function renderClaseMotor(c,demo){const cls=estadoClass(c.estado);return `<div class="vision-class-card ${cls}"><div class="vision-class-layout"><div class="vision-class-title">${escapeHtml(c.sigla||'-')}</div><div class="vision-class-status">${demo?'<span class="badge media">DEMO</span>':''}<span class="badge ${cls}">${escapeHtml(c.estado||'-')}</span></div><div class="vision-class-subtitle">${escapeHtml(c.asignatura||'')} · ${escapeHtml(c.profesor||'')}</div><div class="vision-class-donut">${renderDonutParticipacion_(c.participantes,c.agendados)}</div><div class="vision-class-meta-left"><div class="vision-class-meta-item"><b>Horario:</b> ${escapeHtml(c.inicio||'-')} - ${escapeHtml(c.fin||'-')}</div><div class="vision-class-meta-item"><b>Participantes:</b> ${num(c.participantes)}</div></div><div class="vision-class-meta-right"><div class="vision-class-meta-item"><b>Zoom:</b> ${c.zoomActivo?'Activo':'No activo'}</div><div class="vision-class-meta-item"><b>Agendados:</b> ${num(c.agendados)}</div></div>${renderBarraAvanceClase_(c)}<div class="vision-class-note">${escapeHtml(c.observacion||'')}</div></div></div>`}
+function renderClaseMotor(c,demo){const cls=estadoClass(c.estado);const pct=c.agendados>0?Math.round((Number(c.participantes||0)/Number(c.agendados||1))*100):0;return `<div class="vision-class-card compact ${cls}"><div class="vision-class-layout"><div class="vision-class-title">${escapeHtml(c.sigla||'-')}</div><div class="vision-class-status">${demo?'<span class="badge media">DEMO</span>':''}<span class="badge ${cls}">${escapeHtml(c.estado||'-')}</span></div><div class="vision-class-donut">${renderDonutParticipacion_(c.participantes,c.agendados)}</div><div class="class-mini-meta"><div><b>Participación:</b> ${num(c.participantes)} / ${num(c.agendados)} (${num(pct)}%)</div><div><b>Zoom:</b> ${c.zoomActivo?'Activo':'No activo'}</div>${c.inicio||c.fin?`<div><b>Horario:</b> ${escapeHtml(c.inicio||'-')} - ${escapeHtml(c.fin||'-')}</div>`:''}</div><details class="class-detail"><summary>Ver detalle operativo</summary><div class="class-detail-body">${renderBarraAvanceClase_(c)}<div class="vision-class-note">${escapeHtml(c.observacion||'')}</div></div></details></div></div>`}
 function renderBarraAvanceClase_(c){const t=obtenerTiemposClase_(c);if(!t)return `<div class="vision-class-progress"><div class="empty" style="text-align:left;">No fue posible calcular el avance temporal de esta clase porque falta horario válido.</div></div>`;const a=calcularAvanceClase_(t.inicioMs,t.finMs);return `<div class="vision-class-progress vision-class-clock" data-inicio-ms="${t.inicioMs}" data-fin-ms="${t.finMs}"><div class="vision-class-time"><span><b>Tiempo transcurrido:</b> <span class="js-transcurrido">${a.transcurridoTexto}</span></span><span><b>Tiempo restante:</b> <span class="js-restante">${a.restanteTexto}</span></span></div><div class="vision-progress-label"><b>Avance de la clase</b><span class="js-pct">${a.pct}%</span></div><div class="vision-progress-track"><div class="vision-progress-fill js-fill" style="width:${a.pct}%;"></div><div class="vision-progress-dot js-dot" style="left:calc(${a.pct}% - 8px);"></div></div></div>`}
 function renderDonutParticipacion_(p,a){p=Number(p||0);a=Number(a||0);const pct=a>0?Math.min(100,Math.round((p/a)*100)):0;return `<div class="vision-donut-box"><div class="vision-donut" style="background:conic-gradient(#1d7df2 ${pct*3.6}deg,#e6edf6 0deg);"><div class="vision-donut-inner">${pct}%</div></div><div class="vision-donut-caption">Participación<br>${p} / ${a}</div></div>`}
-function renderBandeja(b){const items=b.items||[],r=b.resumen||{},live=b.liveResumen||{},total=Number(b.total||0);let body='';if(items.length){body=`<div class="inc-list">${items.map(renderIncidencia).join('')}</div>`}else if(total>0){body=`<div class="module-grid"><div class="module-card"><h3>Pendientes de revisión</h3><div class="big">${num(total)}</div><p>Casos pendientes en bandeja operativa o auditoría humana.</p></div><div class="module-card"><h3>Incidencias abiertas</h3><div class="big">${num(b.abiertasEnBandeja||0)}</div><p>Incidencias que permanecen abiertas operacionalmente.</p></div><div class="module-card"><h3>Total en bandeja</h3><div class="big">${num(b.incidenciasEnBandeja||live.totalBandeja||0)}</div><p>Incluye abiertas y cerradas automáticamente pendientes de revisión.</p></div></div><div class="empty" style="text-align:left;margin-top:14px;"><b>Lectura:</b><br>El snapshot vivo separa incidencias abiertas de pendientes de revisión. Puede haber incidencias cerradas por Visión que sigan pendientes de auditoría humana.</div>`}else{body=`<div class="empty">No hay incidencias pendientes en bandeja.</div>`}return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Bandeja ejecutiva</h2><div class="panel-subtitle">Pendientes: ${num(total)} · Alta: ${num(r.alta)} · Observación: ${num(r.enObservacion)}</div></div><span class="badge ${total>0?'alta':'ok'}">${total>0?'Con gestión':'Sin pendientes'}</span></div><div class="panel-body">${body}</div></section>`}
+function renderBandeja(b){const items=b.items||[],r=b.resumen||{},live=b.liveResumen||{},k=window.__visionKpis||{},total=Number(b.total||0);let body='';if(items.length){body=`<div class="inc-list">${items.map(renderIncidencia).join('')}</div>${renderGestionHumanaDemo_('real')}`}else if(total>0||Number(k.incidenciasDetectadasHoy||0)>0){body=`<div class="management-grid"><div class="management-card"><h3>Pendientes de revisión</h3><div class="big">${num(total)}</div><p>Casos que requieren revisión humana o auditoría posterior, aunque Visión haya cerrado operacionalmente algunos eventos.</p></div><div class="management-card"><h3>Incidencias detectadas hoy</h3><div class="big">${num(k.incidenciasDetectadasHoy||0)}</div><p>Eventos convertidos en casos por Visión durante la jornada.</p></div><div class="management-card"><h3>Incidencias cerradas por Visión</h3><div class="big">${num(k.incidenciasCerradasHoy||0)}</div><p>Cierres automáticos o normalizados que igualmente pueden requerir justificación humana.</p></div></div>${renderGestionHumanaDemo_('demo')}`}else{body=`<div class="empty">No hay incidencias pendientes en bandeja.</div>${renderGestionHumanaDemo_('demo-vacio')}`}return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Bandeja ejecutiva</h2><div class="panel-subtitle">Pendientes revisión: ${num(total)} · Incidencias hoy: ${num(k.incidenciasDetectadasHoy||0)} · Cerradas: ${num(k.incidenciasCerradasHoy||0)}</div></div><span class="badge ${total>0?'alta':'ok'}">${total>0?'Con gestión':'Sin pendientes activos'}</span></div><div class="panel-body">${body}</div></section>`}
 function renderIncidencia(x){const cls=prioridadClass(x.prioridad);return `<div class="inc-card ${cls}"><div class="inc-top"><div><div class="inc-title">${escapeHtml(x.sigla||'-')}</div><div class="inc-note">${escapeHtml(x.estadoDetectado||'')} · ${escapeHtml(x.asignatura||'')}</div></div><span class="badge ${cls}">${escapeHtml(x.prioridad||'-')}</span></div><div class="inc-meta"><div><b>Profesor/a:</b> ${escapeHtml(x.profesor||'-')}</div><div><b>Horario:</b> ${escapeHtml(x.horario||'-')}</div><div><b>Participantes:</b> ${num(x.participantes)} / ${num(x.agendados)}</div><div><b>Responsable:</b> ${escapeHtml(x.responsable||'-')}</div></div><div class="inc-note">${escapeHtml(x.observacion||'')}</div></div>`}
-function renderImpacto(i){const a=i.funcionesAbsorbidas||[],p=i.proximasAutomatizaciones||[];return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Impacto organizacional</h2><div class="panel-subtitle">Visión ya absorbe funciones manuales repetitivas y abre camino para reducción progresiva de costos.</div></div><span class="badge media">Estrategia</span></div><div class="panel-body"><div class="function-grid"><div class="function-card"><h3>Funciones ya absorbidas</h3><div class="check-list">${a.map(x=>`<div class="check-item"><span class="check">✓</span><span>${escapeHtml(x)}</span></div>`).join('')}</div></div><div class="function-card next"><h3>Próximas funciones absorbibles</h3><div class="check-list">${p.map(x=>`<div class="check-item"><span class="check">→</span><span>${escapeHtml(x)}</span></div>`).join('')}</div><div class="empty" style="margin-top:14px;text-align:left;"><b>Conclusión:</b><br>${escapeHtml(i.conclusion||'')}</div></div></div></div></section>`}
 
-let implLoadingTimer=null,implLoadingIndex=0;
-const IMPL_LOADING_STEPS=['Visión revisa CURSOS...','Visión busca el curso Moodle...','Visión verifica grupo y cohorte...','Visión valida asistencia y Zoom...','Visión compara restricciones...','Visión prepara evidencia...'];
-
-async function runImplementationHealthCheck(){
-  const input=document.getElementById('implSiglaInput'),btn=document.getElementById('implRunBtn');
-  const sigla=(input&&input.value?input.value:'').trim();
-  if(!sigla){setImplStatus_('Debe ingresar una sigla.');return}
-  try{
-    if(btn)btn.disabled=true;
-    startImplementationHealthLoading_();
-    const data=await gasJsonpAction('visionRunMoodleImplementationProbe',{sigla});
-    if(!data||!data.ok)throw new Error((data&&data.error)||'No se pudo ejecutar el diagnóstico.');
-    renderImplementationHealthResult_(data.diagnostico||{});
-  }catch(err){
-    stopImplementationHealthLoading_();
-    setImplStatus_('Error: '+err.message);
-  }finally{
-    if(btn)btn.disabled=false;
-  }
+function renderGestionHumanaDemo_(modo){
+  const demo=modo!=='real';
+  return `<div class="management-card" style="margin-top:14px;"><h3>${demo?'Ejemplo de cierre asistido':'Cierre asistido'}</h3><p>${demo?'Demostración funcional para mostrar al equipo cómo Implementación podría justificar y cerrar un caso sin salir de Visión.':'Registrar justificación antes de cerrar o escalar.'}</p><div class="management-actions"><select ${demo?'':'disabled'}><option>Clase inició tarde y luego se normalizó</option><option>Profesor usó sala distinta</option><option>Suspensión informada por Implementación</option><option>Error de configuración corregido</option><option>Requiere recuperación de clase</option></select><textarea ${demo?'placeholder="Ejemplo: Se contactó al profesor. La clase inició 7 minutos tarde y luego continuó normalmente. Se deja trazabilidad para reporte."':'disabled'}></textarea><button type="button" ${demo?'':'disabled'}>${demo?'Guardar comentario demo':'Guardar comentario'}</button></div></div>`;
 }
+
+function renderImpacto(i){const a=i.funcionesAbsorbidas||[],p=i.proximasAutomatizaciones||[];return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Impacto organizacional</h2><div class="panel-subtitle">Visión no solo monitorea: absorbe trabajo repetitivo, crea evidencia y permite gestión por datos.</div></div><span class="badge media">Estrategia</span></div><div class="panel-body"><div class="impact-exec"><div class="impact-metric"><div class="big">24/7</div><p>Monitoreo automático sin depender de revisión manual permanente.</p></div><div class="impact-metric"><div class="big">1 fuente</div><p>Eventos, incidencias, recordatorios y salud operativa dentro de una misma vitrina.</p></div><div class="impact-metric"><div class="big">↓ fricción</div><p>Menos preguntas cruzadas entre Campus Virtual, Implementación y Comunicaciones.</p></div><div class="impact-metric"><div class="big">↑ evidencia</div><p>Reportes defendibles para gerencia frente a reclamos o percepciones de suspensión.</p></div></div><div class="function-grid"><div class="function-card"><h3>Funciones ya absorbidas</h3><div class="check-list">${a.map(x=>`<div class="check-item"><span class="check">✓</span><span>${escapeHtml(x)}</span></div>`).join('')}</div></div><div class="function-card next"><h3>Próximas funciones absorbibles</h3><div class="check-list">${p.map(x=>`<div class="check-item"><span class="check">→</span><span>${escapeHtml(x)}</span></div>`).join('')}</div><div class="empty" style="margin-top:14px;text-align:left;"><b>Conclusión:</b><br>${escapeHtml(i.conclusion||'')}</div></div></div></div></section>`}
 function startImplementationHealthLoading_(){
   implLoadingIndex=0;
   setImplStatus_(IMPL_LOADING_STEPS[0]);
@@ -256,7 +598,7 @@ function startImplementationHealthLoading_(){
   stopImplementationHealthLoading_();
   implLoadingTimer=setInterval(()=>{
     implLoadingIndex=(implLoadingIndex+1)%IMPL_LOADING_STEPS.length;
-    const pct=Math.min(88,8+implLoadingIndex*16);
+    const pct=Math.min(92,8+implLoadingIndex*8.4);
     setImplStatus_(IMPL_LOADING_STEPS[implLoadingIndex]);
     setImplProgress_(pct);
   },850);
@@ -264,7 +606,7 @@ function startImplementationHealthLoading_(){
 function stopImplementationHealthLoading_(){if(implLoadingTimer){clearInterval(implLoadingTimer);implLoadingTimer=null}}
 function setImplProgress_(pct){pct=Math.max(0,Math.min(100,Number(pct||0)));const f=document.getElementById('implProgressFill'),r=document.getElementById('implRobot');if(f)f.style.width=pct+'%';if(r){r.style.left=pct+'%';r.style.opacity='1'}}
 function setImplStatus_(text){const s=document.getElementById('implStatus');if(s)s.innerHTML=escapeHtml(text)}
-function renderImplementationPlaceholderDuringLoading_(){const nodes=['CURSOS','Curso','Grupo','Cohorte','Asistencia','Rest. asist.','Zoom','HTML','Rest. Zoom','Profesor','Regla'];const cont=document.getElementById('implNodes');if(!cont)return;cont.innerHTML=nodes.map((n,i)=>`<div class="impl-node"><div class="impl-dot ${i<=implLoadingIndex?'ok':'pending'}">${i<=implLoadingIndex?'✓':'○'}</div><div>${escapeHtml(n)}</div></div>`).join('')}
+function renderImplementationPlaceholderDuringLoading_(){const nodes=implNodeCatalog_();const cont=document.getElementById('implNodes');if(!cont)return;cont.classList.add('iconic');cont.innerHTML=nodes.map((n,i)=>`<div class="impl-node"><div class="impl-dot icon ${i<=implLoadingIndex?'ok':'pending'}">${n.icon}</div><div>${escapeHtml(n.short)}</div></div>`).join('')}
 function renderImplementationHealthResult_(diag){
   stopImplementationHealthLoading_();
   const matriz=diag.matrizComparacion||[];
@@ -286,7 +628,9 @@ function renderImplementationHealthResult_(diag){
 }
 function renderImplementationNodes_(matriz){
   const cont=document.getElementById('implNodes');if(!cont)return;
-  cont.innerHTML=(matriz||[]).map((item,index)=>{const cls=implStateClass_(item.estado),sym=implStateSymbol_(item.estado);return `<div class="impl-node"><div class="impl-dot ${cls}">${sym}</div><div>${escapeHtml(item.nodo||('Nodo '+(index+1)))}</div></div>`}).join('');
+  cont.classList.add('iconic');
+  const catalog=implNodeCatalog_();
+  cont.innerHTML=(matriz||[]).map((item,index)=>{const cls=implStateClass_(item.estado),sym=implNodeIcon_(item.nodo,catalog);return `<div class="impl-node"><div class="impl-dot icon ${cls}">${sym}</div><div>${escapeHtml(item.nodo||('Nodo '+(index+1)))}</div></div>`}).join('');
 }
 function renderImplementationEvidence_(diag){
   const cont=document.getElementById('implEvidence');if(!cont)return;
@@ -303,6 +647,28 @@ function renderImplementationJson_(diag){
   const cont=document.getElementById('implJsonGrid');if(!cont)return;
   cont.innerHTML=`<div class="impl-json-box"><b>Datos originales desde CURSOS</b><pre>${escapeHtml(JSON.stringify(diag.datosCursos||{},null,2))}</pre></div><div class="impl-json-box"><b>Datos capturados desde Moodle/API</b><pre>${escapeHtml(JSON.stringify(diag.datosMoodle||{},null,2))}</pre></div>`;
 }
+
+function implNodeCatalog_(){
+  return [
+    {short:'CURSOS',icon:'📋',match:'CURSOS'},
+    {short:'Curso',icon:'🏫',match:'Curso Moodle'},
+    {short:'Grupo',icon:'👥',match:'Grupo Moodle'},
+    {short:'Cohorte',icon:'🎯',match:'Cohorte Moodle'},
+    {short:'Asistencia',icon:'📝',match:'Recurso asistencia'},
+    {short:'Rest. asist.',icon:'🔐',match:'Restricciones asistencia'},
+    {short:'Zoom',icon:'🎥',match:'Recurso Zoom'},
+    {short:'HTML',icon:'🔗',match:'HTML Zoom'},
+    {short:'Rest. Zoom',icon:'🛡️',match:'Restricciones Zoom'},
+    {short:'Profesor',icon:'👨‍🏫',match:'Profesor en grupo'},
+    {short:'Regla',icon:'⚙️',match:'Regla perfil→cohorte'}
+  ];
+}
+function implNodeIcon_(nodo,catalog){
+  const n=String(nodo||'');
+  const hit=(catalog||implNodeCatalog_()).find(x=>n.includes(x.match)||x.match.includes(n));
+  return hit?hit.icon:'•';
+}
+
 function implStateClass_(estado){if(estado==='OK')return'ok';if(estado==='FALTA_VALIDAR')return'pending';if(estado==='OBSERVAR')return'warn';if(estado==='ERROR')return'error';return'pending'}
 function implStateSymbol_(estado){if(estado==='OK')return'✓';if(estado==='FALTA_VALIDAR')return'○';if(estado==='OBSERVAR')return'!';if(estado==='ERROR')return'×';return'○'}
 
