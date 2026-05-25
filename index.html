@@ -75,11 +75,126 @@ const REFRESH_SECONDS=180;
 let refreshLeft=REFRESH_SECONDS,refreshTimer=null,classClockTimer=null,loadingTimer=null,loadingProgress=0,visionData=null,currentView='inicio';
 const VIEWS=[['inicio','Inicio'],['monitoreo','Monitoreo en Vivo'],['bandeja','Bandeja Ejecutiva'],['recordatorios','Recordatorios'],['salud','Salud de Cursos'],['timeline','Timeline'],['reportes','Reportes']];
 
-function jsonp(url){return new Promise((resolve,reject)=>{const cb='__visionCallback_'+Date.now()+'_'+Math.floor(Math.random()*100000);window[cb]=data=>{try{resolve(data)}finally{delete window[cb];script.remove()}};const script=document.createElement('script');script.src=url+(url.includes('?')?'&':'?')+'action=visionExecutiveSnapshot&callback='+encodeURIComponent(cb)+'&_='+Date.now();script.onerror=()=>{delete window[cb];script.remove();reject(new Error('No fue posible conectar con el endpoint de Visión.'))};document.body.appendChild(script)})}
+function jsonp(url){return new Promise((resolve,reject)=>{const cb='__visionCallback_'+Date.now()+'_'+Math.floor(Math.random()*100000);window[cb]=data=>{try{resolve(data)}finally{delete window[cb];script.remove()}};const script=document.createElement('script');script.src=url+(url.includes('?')?'&':'?')+'action=visionLiveOperationsSnapshot&callback='+encodeURIComponent(cb)+'&_='+Date.now();script.onerror=()=>{delete window[cb];script.remove();reject(new Error('No fue posible conectar con el endpoint de Visión.'))};document.body.appendChild(script)})}
 function gasJsonpAction(action,params={}){return new Promise((resolve,reject)=>{const cb='__visionActionCallback_'+Date.now()+'_'+Math.floor(Math.random()*100000);window[cb]=data=>{try{resolve(data)}finally{delete window[cb];script.remove()}};const qs=new URLSearchParams(Object.assign({},params,{action,callback:cb,_:Date.now()}));const script=document.createElement('script');script.src=GAS_URL+'?'+qs.toString();script.onerror=()=>{delete window[cb];script.remove();reject(new Error('No fue posible conectar con el endpoint de Visión.'))};document.body.appendChild(script)})}
 
 
-async function cargarVision(){const app=document.getElementById('app');const first=app.dataset.loaded!=='1';try{if(first)mostrarCargaVision_();const data=await jsonp(GAS_URL);if(!data||!data.ok)throw new Error((data&&data.error)||'Respuesta inválida del backend.');visionData=data;if(first){completarCargaVision_(()=>{app.dataset.loaded='1';renderShell()})}else renderShell();refreshLeft=REFRESH_SECONDS}catch(err){detenerCargaVision_();app.className='';app.innerHTML=`<div class="error-box"><strong>No fue posible cargar Visión.</strong><br><br>${escapeHtml(err.message)}</div>`}}
+
+function normalizarSnapshotVision_(data){
+  if(!data||!data.ok)return data;
+
+  const esLive=(data.estado&&data.estado.esSnapshotVivo)||((data.sistema||{}).modulo==='Snapshot Vivo Operacional');
+  if(!esLive)return data;
+
+  const k=data.kpis||{};
+  const vivo=data.visionEnVivo||{};
+  const bandeja=data.bandeja||{};
+  const incidencias=data.incidencias||{};
+  const notificaciones=data.notificaciones||{};
+  const clases=(vivo.detalleClases||[]).map(adaptarClaseViva_);
+
+  const pendientesPrioridad=bandeja.pendientesPorPrioridad||{};
+  const pendientesEstado=bandeja.pendientesPorEstadoRevision||{};
+
+  return Object.assign({},data,{
+    sistema:Object.assign({
+      titulo:'Visión | Centro Operativo Inteligente',
+      subtitulo:'Monitoreo vivo, trazabilidad e incidencias operativas de Campus Virtual'
+    },data.sistema||{}),
+    estado:Object.assign({},data.estado||{},{
+      modoProduccion:true,
+      telegramActivo:true,
+      horaSimulada:false,
+      actualizacionCursosAntesMonitoreo:'',
+      triggersActivos:'',
+      detalle:(data.estado&&data.estado.detalle)||'Snapshot vivo calculado desde EVENTOS_CLASE, INCIDENCIAS, LOG_NOTIFICACIONES y BANDEJA_INCIDENCIAS.'
+    }),
+    kpis:Object.assign({},k,{
+      pendientesBandeja:k.pendientesBandeja||bandeja.pendientesRevision||0,
+      incidenciasAbiertas:k.incidenciasAbiertas||incidencias.abiertas||0,
+      criticasOperativasAbiertas:k.criticasOperativasAbiertas||incidencias.criticasOperativasAbiertas||0
+    }),
+    motor:{
+      timestamp:(data.sistema||{}).generadoEn||'',
+      clasesEvaluadasUltimoCiclo:vivo.clasesMonitoreadas||k.clasesMonitoreadasHoy||0,
+      reunionesLiveZoomUltimoCiclo:vivo.clasesConZoomActivo||k.clasesConZoomActivoHoy||0,
+      clases:clases
+    },
+    bandeja:{
+      total:bandeja.pendientesRevision||k.pendientesBandeja||0,
+      fuente:bandeja.fuente||'BANDEJA_INCIDENCIAS',
+      abiertasEnBandeja:bandeja.abiertasEnBandeja||0,
+      incidenciasEnBandeja:bandeja.totalBandeja||k.incidenciasEnBandeja||0,
+      resumen:{
+        alta:Number(pendientesPrioridad.ALTA||pendientesPrioridad.Alta||pendientesPrioridad.alta||0),
+        critica:Number(pendientesPrioridad.CRITICA||pendientesPrioridad.Critica||pendientesPrioridad.critica||0),
+        media:Number(pendientesPrioridad.MEDIA||pendientesPrioridad.Media||pendientesPrioridad.media||0),
+        baja:Number(pendientesPrioridad.BAJA||pendientesPrioridad.Baja||pendientesPrioridad.baja||0),
+        enObservacion:Number(pendientesEstado.EN_OBSERVACION||pendientesEstado.en_observacion||0)
+      },
+      items:[],
+
+      // Datos explicativos para la nueva tarjeta de resumen cuando no hay listado detallado.
+      liveResumen:{
+        totalBandeja:bandeja.totalBandeja||0,
+        pendientesRevision:bandeja.pendientesRevision||0,
+        abiertasEnBandeja:bandeja.abiertasEnBandeja||0,
+        pendientesPorPrioridad:pendientesPrioridad,
+        pendientesPorEstadoRevision:pendientesEstado
+      }
+    },
+    recordatorios:{
+      enviadosHoy:k.recordatoriosEnviadosHoy||notificaciones.recordatoriosEnviados||0,
+      alertasHoy:k.alertasIncidenciaHoy||notificaciones.alertasIncidenciaEnviadas||0,
+      erroresHoy:k.erroresNotificacionHoy||notificaciones.errores||0
+    },
+    impacto:{
+      funcionesAbsorbidas:[
+        'Monitoreo automático de clases en ventana operativa.',
+        'Detección automática de clases no iniciadas, baja asistencia y finalización anticipada.',
+        'Registro de incidencias con trazabilidad.',
+        'Alertas por Telegram con antiduplicado operativo.'
+      ],
+      proximasAutomatizaciones:[
+        'Snapshot ejecutivo vivo separado del reporte diario.',
+        'Auditoría Zoom de cierre operativo.',
+        'Salud de implementación Moodle bajo demanda.'
+      ],
+      conclusion:'El snapshot vivo permite que la vitrina ejecutiva refleje la operación real del día sin depender del reporte diario ni del cierre analítico.'
+    }
+  });
+}
+
+function adaptarClaseViva_(c){
+  const estado=estadoPrincipalClaseViva_(c.estados||{});
+  return {
+    sigla:c.sigla||'',
+    estado:estado,
+    asignatura:'',
+    profesor:'',
+    inicio:'',
+    fin:'',
+    participantes:c.maxParticipantes||0,
+    agendados:c.maxAgendados||0,
+    zoomActivo:!!c.zoomActivo,
+    observacion:'Eventos registrados: '+num(c.eventos||0)+' · Estados: '+resumirEstadosClase_(c.estados||{})
+  };
+}
+
+function estadoPrincipalClaseViva_(estados){
+  const prioridad=['NO_INICIADA_T5','NO_INICIADA_T2','FINALIZACION_ANTICIPADA','BAJA_ASISTENCIA','PROFESOR_SOLO','SIN_ESTUDIANTES','INICIADA_NORMAL','PROXIMA_A_INICIAR','ESPERANDO_INICIO','EN_VENTANA_PREVIA','FINALIZADA'];
+  for(const p of prioridad){if(Number(estados[p]||0)>0)return p}
+  const keys=Object.keys(estados||{});
+  return keys.length?keys[0]:'SIN_ESTADO';
+}
+
+function resumirEstadosClase_(estados){
+  const keys=Object.keys(estados||{});
+  if(!keys.length)return 'sin estados';
+  return keys.map(k=>k+'('+estados[k]+')').join(', ');
+}
+
+async function cargarVision(){const app=document.getElementById('app');const first=app.dataset.loaded!=='1';try{if(first)mostrarCargaVision_();const data=await jsonp(GAS_URL);if(!data||!data.ok)throw new Error((data&&data.error)||'Respuesta inválida del backend.');visionData=normalizarSnapshotVision_(data);if(first){completarCargaVision_(()=>{app.dataset.loaded='1';renderShell()})}else renderShell();refreshLeft=REFRESH_SECONDS}catch(err){detenerCargaVision_();app.className='';app.innerHTML=`<div class="error-box"><strong>No fue posible cargar Visión.</strong><br><br>${escapeHtml(err.message)}</div>`}}
 
 function mostrarCargaVision_(){const app=document.getElementById('app');loadingProgress=0;app.className='loading-vision';app.innerHTML=`<div class="loading-vision-card"><div class="loading-vision-bot-stage"><img class="loading-vision-bot-base" src="${BOT_IMG}" alt="Visión base"><div id="loadingVisionBotFillWrap" class="loading-vision-bot-fill-wrap"><img class="loading-vision-bot-fill" src="${BOT_IMG}" alt="Visión cargando"></div><div id="loadingVisionBotGlow" class="loading-vision-bot-glow"></div></div><div class="loading-vision-title">Cargando Visión</div><div class="loading-vision-subtitle">Inicializando centro operativo, métricas, alertas y bandeja ejecutiva.</div><div id="loadingVisionPct" class="loading-percent">0%</div><div class="loading-bar"><div id="loadingVisionFill" class="loading-bar-fill"></div></div><div class="loading-vision-foot">Preparando snapshot ejecutivo en tiempo real...</div></div>`;detenerCargaVision_();loadingTimer=setInterval(()=>{if(loadingProgress<92){loadingProgress=Math.min(92,loadingProgress+Math.floor(Math.random()*5)+2);actualizarCargaVision_(loadingProgress)}},140)}
 function completarCargaVision_(callback){detenerCargaVision_();const ini=loadingProgress,dur=420,t0=performance.now();function anim(t){const a=Math.min(1,(t-t0)/dur),p=Math.round(ini+(100-ini)*a);actualizarCargaVision_(p);if(a<1)requestAnimationFrame(anim);else setTimeout(callback,160)}requestAnimationFrame(anim)}
@@ -100,7 +215,7 @@ function renderVistaSalud(){return `<section class="panel"><div class="panel-hea
 function renderSaludImplementacionMoodle(){return `<section class="panel" id="implHealthPanel"><div class="panel-header"><div><h2 class="panel-title">Salud de Implementación Moodle</h2><div class="panel-subtitle">Consulta puntual por sigla. Visión compara CURSOS contra Moodle/API y entrega evidencia por nodo.</div></div><span class="badge media">Diagnóstico bajo demanda</span></div><div class="panel-body"><div class="impl-health-intro"><div class="impl-health-card"><h3>Consulta de salud</h3><p>Ingrese una sigla de curso para verificar curso Moodle, grupo, cohorte, asistencia, restricciones, Zoom y profesor.</p><div class="impl-search"><input id="implSiglaInput" value="2026 EET CR LEN01" placeholder="Ej: 2026 EET CR LEN01"><button id="implRunBtn" type="button" onclick="runImplementationHealthCheck()">Verificar</button></div><div id="implStatus" class="impl-status">Listo para verificar. La consulta se ejecuta contra Apps Script y Moodle/API.</div></div><div class="impl-health-card"><h3>Lectura esperada</h3><p>El robot Visión avanza sobre la ruta mientras se consulta el backend. Al finalizar, se muestra una matriz: <b>esperado desde CURSOS</b> versus <b>capturado desde Moodle/API</b>.</p></div></div><div class="impl-route"><div class="impl-line-wrap"><div class="impl-line"><div id="implProgressFill" class="impl-line-fill"></div><img id="implRobot" class="impl-robot" src="${BOT_IMG}" alt="Visión"></div><div id="implNodes" class="impl-nodes">${renderImplementationPlaceholderNodes()}</div></div></div><div class="impl-summary-grid"><div class="impl-summary-box"><span id="implPercent" class="big">0%</span><small>verificación</small></div><div class="impl-summary-box"><span id="implOk" class="big">0</span><small>OK</small></div><div class="impl-summary-box"><span id="implBrechas" class="big">0</span><small>brechas</small></div><div class="impl-summary-box"><span id="implPendientes" class="big">0</span><small>pendientes</small></div></div><div id="implEvidence" class="impl-evidence"></div><div id="implTable" class="impl-table-wrap"></div><div id="implJsonGrid" class="impl-json-grid"></div></div></section>`}
 function renderImplementationPlaceholderNodes(){const nodes=['CURSOS','Curso','Grupo','Cohorte','Asistencia','Rest. asist.','Zoom','HTML','Rest. Zoom','Profesor','Regla'];return nodes.map(n=>`<div class="impl-node"><div class="impl-dot pending">○</div><div>${escapeHtml(n)}</div></div>`).join('')}
 function renderVistaTimeline(d){const k=d.kpis||{},items=((d.bandeja||{}).items||[]);return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Timeline operativo</h2><div class="panel-subtitle">Bitácora conversacional de acciones, alertas, recordatorios e incidencias.</div></div><span class="badge media">Prototipo</span></div><div class="panel-body"><div class="timeline"><div class="timeline-item"><div class="timeline-icon">V</div><div><div class="timeline-title">Snapshot ejecutivo actualizado</div><div class="timeline-text">Visión consolidó KPIs diarios, bandeja ejecutiva, estado operativo e impacto organizacional.</div></div></div><div class="timeline-item"><div class="timeline-icon">🔔</div><div><div class="timeline-title">Recordatorios procesados</div><div class="timeline-text">Recordatorios internos enviados hoy: ${num(k.recordatoriosEnviadosHoy)}.</div></div></div><div class="timeline-item"><div class="timeline-icon">⚠</div><div><div class="timeline-title">Incidencias detectadas</div><div class="timeline-text">Incidencias detectadas hoy: ${num(k.incidenciasDetectadasHoy)}. Pendientes actuales: ${num(k.pendientesBandeja)}.</div></div></div>${items.slice(0,3).map(x=>`<div class="timeline-item"><div class="timeline-icon">!</div><div><div class="timeline-title">${escapeHtml(x.sigla||'-')} · ${escapeHtml(x.estadoDetectado||'')}</div><div class="timeline-text">${escapeHtml(x.observacion||'')}</div></div></div>`).join('')}</div></div></section>`}
-function renderVistaReportes(d){const k=d.kpis||{},s=d.sistema||{};return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Reportes</h2><div class="panel-subtitle">Resumen ejecutivo y base para reportería diaria/semanal.</div></div><span class="badge ok">Disponible</span></div><div class="panel-body"><div class="module-grid"><div class="module-card"><h3>Reporte diario</h3><span class="badge ok">Operativo</span><p>Último snapshot: ${escapeHtml(s.generadoEn||'-')}</p></div><div class="module-card"><h3>Clases monitoreadas</h3><div class="big">${num(k.clasesMonitoreadasHoy)}</div><p>Cobertura diaria registrada.</p></div><div class="module-card"><h3>Incidencias detectadas</h3><div class="big">${num(k.incidenciasDetectadasHoy)}</div><p>Casos creados automáticamente.</p></div><div class="module-card"><h3>Incidencias cerradas</h3><div class="big">${num(k.incidenciasCerradasHoy)}</div><p>Cierres normalizados o resueltos.</p></div><div class="module-card"><h3>Reporte semanal</h3><span class="badge media">Próxima iteración</span><p>Tendencias por programa, asignatura, profesor y tipo de incidencia.</p></div><div class="module-card"><h3>Impacto organizacional</h3><span class="badge media">Próxima iteración</span><p>Horas humanas absorbidas, consultas evitadas y costo operativo reducido.</p></div></div></div></section>`}
+function renderVistaReportes(d){const k=d.kpis||{},s=d.sistema||{};return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Reportes</h2><div class="panel-subtitle">Snapshot vivo para operación diaria y base para reportería diaria/semanal.</div></div><span class="badge ok">Disponible</span></div><div class="panel-body"><div class="module-grid"><div class="module-card"><h3>Reporte diario</h3><span class="badge ok">Operativo</span><p>Último snapshot: ${escapeHtml(s.generadoEn||'-')}</p></div><div class="module-card"><h3>Clases monitoreadas</h3><div class="big">${num(k.clasesMonitoreadasHoy)}</div><p>Cobertura diaria registrada.</p></div><div class="module-card"><h3>Incidencias detectadas</h3><div class="big">${num(k.incidenciasDetectadasHoy)}</div><p>Casos creados automáticamente.</p></div><div class="module-card"><h3>Incidencias cerradas</h3><div class="big">${num(k.incidenciasCerradasHoy)}</div><p>Cierres normalizados o resueltos.</p></div><div class="module-card"><h3>Reporte semanal</h3><span class="badge media">Próxima iteración</span><p>Tendencias por programa, asignatura, profesor y tipo de incidencia.</p></div><div class="module-card"><h3>Impacto organizacional</h3><span class="badge media">Próxima iteración</span><p>Horas humanas absorbidas, consultas evitadas y costo operativo reducido.</p></div></div></div></section>`}
 function renderHero(s,e){return `<section class="hero"><div class="hero-main"><div class="hero-content"><div class="eyebrow"><span class="pulse"></span>Sistema en producción</div><h1>Visión</h1><div class="subtitle">${escapeHtml(s.subtitulo||'Centro Operativo Inteligente de Campus Virtual')}</div><div class="hero-strip"><span class="chip">Estado: <b>${escapeHtml(e.operativo||'-')}</b></span><span class="chip">Telegram: <b>${e.telegramActivo?'Activo':'Inactivo'}</b></span><span class="chip">Producción: <b>${e.modoProduccion?'Activa':'No activa'}</b></span><span class="chip">Triggers: <b>${e.triggersActivos||0}</b></span><span class="chip">Próxima actualización: <b id="refreshCounter">${REFRESH_SECONDS} s</b></span></div></div></div><div class="hero-bot"><div class="bot-wrap"><img src="${BOT_IMG}" alt="Visión"></div><div class="bot-caption"><b>Visión está operando.</b><br>Monitorea clases, detecta incidencias, envía alertas, mantiene bandeja y genera reporte diario.</div></div></section>`}
 function renderStatusRow(s,e){return `<section class="status-row"><div class="status-card"><div class="status-label">Estado operativo</div><div class="status-value">${escapeHtml(e.operativo||'-')}</div><div class="status-detail">${escapeHtml(e.detalle||'')}</div></div><div class="status-card"><div class="status-label">Última actualización</div><div class="status-value">${escapeHtml(s.generadoEn||'-')}</div><div class="status-detail">Snapshot ejecutivo desde Apps Script.</div></div><div class="status-card"><div class="status-label">Modo producción</div><div class="status-value">${e.modoProduccion?'ACTIVO':'INACTIVO'}</div><div class="status-detail">Alertas y reportes operativos habilitados.</div></div><div class="status-card"><div class="status-label">Capa automática</div><div class="status-value">${e.triggersActivos||0} triggers</div><div class="status-detail">Monitoreo, panel, actualización horaria y reporte.</div></div></section>`}
 function renderKpis(k){const cards=[['Clases monitoreadas',k.clasesMonitoreadasHoy,'Cobertura diaria del motor'],['Zoom activo',k.clasesConZoomActivoHoy,'Clases activas al menos una vez'],['Eventos registrados',k.eventosRegistradosHoy,'Trazabilidad operativa'],['Incidencias detectadas',k.incidenciasDetectadasHoy,'Casos creados por Visión'],['Incidencias cerradas',k.incidenciasCerradasHoy,'Normalizadas o resueltas'],['Pendientes bandeja',k.pendientesBandeja,'Carga real de gestión'],['Críticas operativas',k.criticasOperativasAbiertas,'Riesgo actual'],['Errores notificación',k.erroresNotificacionHoy,'Telegram / reporte']];return `<section class="kpi-grid">${cards.map(c=>`<div class="kpi-card"><div class="kpi-label">${escapeHtml(c[0])}</div><div class="kpi-value">${num(c[1])}</div><div class="kpi-note">${escapeHtml(c[2])}</div></div>`).join('')}</section>`}
@@ -109,7 +224,7 @@ function obtenerClaseDemoMotor_(){const now=new Date(),ini=new Date(now.getTime(
 function renderClaseMotor(c,demo){const cls=estadoClass(c.estado);return `<div class="vision-class-card ${cls}"><div class="vision-class-layout"><div class="vision-class-title">${escapeHtml(c.sigla||'-')}</div><div class="vision-class-status">${demo?'<span class="badge media">DEMO</span>':''}<span class="badge ${cls}">${escapeHtml(c.estado||'-')}</span></div><div class="vision-class-subtitle">${escapeHtml(c.asignatura||'')} · ${escapeHtml(c.profesor||'')}</div><div class="vision-class-donut">${renderDonutParticipacion_(c.participantes,c.agendados)}</div><div class="vision-class-meta-left"><div class="vision-class-meta-item"><b>Horario:</b> ${escapeHtml(c.inicio||'-')} - ${escapeHtml(c.fin||'-')}</div><div class="vision-class-meta-item"><b>Participantes:</b> ${num(c.participantes)}</div></div><div class="vision-class-meta-right"><div class="vision-class-meta-item"><b>Zoom:</b> ${c.zoomActivo?'Activo':'No activo'}</div><div class="vision-class-meta-item"><b>Agendados:</b> ${num(c.agendados)}</div></div>${renderBarraAvanceClase_(c)}<div class="vision-class-note">${escapeHtml(c.observacion||'')}</div></div></div>`}
 function renderBarraAvanceClase_(c){const t=obtenerTiemposClase_(c);if(!t)return `<div class="vision-class-progress"><div class="empty" style="text-align:left;">No fue posible calcular el avance temporal de esta clase porque falta horario válido.</div></div>`;const a=calcularAvanceClase_(t.inicioMs,t.finMs);return `<div class="vision-class-progress vision-class-clock" data-inicio-ms="${t.inicioMs}" data-fin-ms="${t.finMs}"><div class="vision-class-time"><span><b>Tiempo transcurrido:</b> <span class="js-transcurrido">${a.transcurridoTexto}</span></span><span><b>Tiempo restante:</b> <span class="js-restante">${a.restanteTexto}</span></span></div><div class="vision-progress-label"><b>Avance de la clase</b><span class="js-pct">${a.pct}%</span></div><div class="vision-progress-track"><div class="vision-progress-fill js-fill" style="width:${a.pct}%;"></div><div class="vision-progress-dot js-dot" style="left:calc(${a.pct}% - 8px);"></div></div></div>`}
 function renderDonutParticipacion_(p,a){p=Number(p||0);a=Number(a||0);const pct=a>0?Math.min(100,Math.round((p/a)*100)):0;return `<div class="vision-donut-box"><div class="vision-donut" style="background:conic-gradient(#1d7df2 ${pct*3.6}deg,#e6edf6 0deg);"><div class="vision-donut-inner">${pct}%</div></div><div class="vision-donut-caption">Participación<br>${p} / ${a}</div></div>`}
-function renderBandeja(b){const items=b.items||[],r=b.resumen||{};return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Bandeja ejecutiva</h2><div class="panel-subtitle">Pendientes: ${num(b.total)} · Alta: ${num(r.alta)} · Observación: ${num(r.enObservacion)}</div></div><span class="badge ${Number(b.total||0)>0?'alta':'ok'}">${Number(b.total||0)>0?'Con gestión':'Sin pendientes'}</span></div><div class="panel-body">${items.length?`<div class="inc-list">${items.map(renderIncidencia).join('')}</div>`:`<div class="empty">No hay incidencias pendientes en bandeja.</div>`}</div></section>`}
+function renderBandeja(b){const items=b.items||[],r=b.resumen||{},live=b.liveResumen||{},total=Number(b.total||0);let body='';if(items.length){body=`<div class="inc-list">${items.map(renderIncidencia).join('')}</div>`}else if(total>0){body=`<div class="module-grid"><div class="module-card"><h3>Pendientes de revisión</h3><div class="big">${num(total)}</div><p>Casos pendientes en bandeja operativa o auditoría humana.</p></div><div class="module-card"><h3>Incidencias abiertas</h3><div class="big">${num(b.abiertasEnBandeja||0)}</div><p>Incidencias que permanecen abiertas operacionalmente.</p></div><div class="module-card"><h3>Total en bandeja</h3><div class="big">${num(b.incidenciasEnBandeja||live.totalBandeja||0)}</div><p>Incluye abiertas y cerradas automáticamente pendientes de revisión.</p></div></div><div class="empty" style="text-align:left;margin-top:14px;"><b>Lectura:</b><br>El snapshot vivo separa incidencias abiertas de pendientes de revisión. Puede haber incidencias cerradas por Visión que sigan pendientes de auditoría humana.</div>`}else{body=`<div class="empty">No hay incidencias pendientes en bandeja.</div>`}return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Bandeja ejecutiva</h2><div class="panel-subtitle">Pendientes: ${num(total)} · Alta: ${num(r.alta)} · Observación: ${num(r.enObservacion)}</div></div><span class="badge ${total>0?'alta':'ok'}">${total>0?'Con gestión':'Sin pendientes'}</span></div><div class="panel-body">${body}</div></section>`}
 function renderIncidencia(x){const cls=prioridadClass(x.prioridad);return `<div class="inc-card ${cls}"><div class="inc-top"><div><div class="inc-title">${escapeHtml(x.sigla||'-')}</div><div class="inc-note">${escapeHtml(x.estadoDetectado||'')} · ${escapeHtml(x.asignatura||'')}</div></div><span class="badge ${cls}">${escapeHtml(x.prioridad||'-')}</span></div><div class="inc-meta"><div><b>Profesor/a:</b> ${escapeHtml(x.profesor||'-')}</div><div><b>Horario:</b> ${escapeHtml(x.horario||'-')}</div><div><b>Participantes:</b> ${num(x.participantes)} / ${num(x.agendados)}</div><div><b>Responsable:</b> ${escapeHtml(x.responsable||'-')}</div></div><div class="inc-note">${escapeHtml(x.observacion||'')}</div></div>`}
 function renderImpacto(i){const a=i.funcionesAbsorbidas||[],p=i.proximasAutomatizaciones||[];return `<section class="panel"><div class="panel-header"><div><h2 class="panel-title">Impacto organizacional</h2><div class="panel-subtitle">Visión ya absorbe funciones manuales repetitivas y abre camino para reducción progresiva de costos.</div></div><span class="badge media">Estrategia</span></div><div class="panel-body"><div class="function-grid"><div class="function-card"><h3>Funciones ya absorbidas</h3><div class="check-list">${a.map(x=>`<div class="check-item"><span class="check">✓</span><span>${escapeHtml(x)}</span></div>`).join('')}</div></div><div class="function-card next"><h3>Próximas funciones absorbibles</h3><div class="check-list">${p.map(x=>`<div class="check-item"><span class="check">→</span><span>${escapeHtml(x)}</span></div>`).join('')}</div><div class="empty" style="margin-top:14px;text-align:left;"><b>Conclusión:</b><br>${escapeHtml(i.conclusion||'')}</div></div></div></div></section>`}
 
