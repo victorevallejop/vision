@@ -1594,6 +1594,125 @@
       gap: 8px;
     }
 
+    .inspector-section {
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: #fff;
+      overflow: hidden;
+      box-shadow: 0 8px 18px rgba(11,31,58,.045);
+    }
+
+    .inspector-section-head {
+      padding: 10px 11px;
+      border-bottom: 1px solid rgba(120,150,180,.18);
+      background: linear-gradient(180deg, #fff, #f4f8fd);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .inspector-section-title {
+      color: #0b1f3a;
+      font-size: 12px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .055em;
+    }
+
+    .inspector-section-body {
+      padding: 10px 11px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .inspector-hero {
+      border: 1px solid var(--line);
+      border-left: 6px solid var(--blue);
+      border-radius: 18px;
+      background: linear-gradient(180deg, #fff, #f7fbff);
+      padding: 12px;
+      box-shadow: 0 8px 18px rgba(11,31,58,.045);
+    }
+
+    .inspector-hero.danger { border-left-color: var(--red); }
+    .inspector-hero.warn { border-left-color: var(--orange); }
+    .inspector-hero.ok { border-left-color: var(--green); }
+    .inspector-hero.info { border-left-color: var(--blue); }
+
+    .inspector-hero-title {
+      color: #071426;
+      font-size: 17px;
+      line-height: 1.15;
+      font-weight: 950;
+      letter-spacing: -.025em;
+    }
+
+    .inspector-hero-subtitle {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .inspector-mini-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .inspector-mini {
+      border: 1px solid rgba(120,150,180,.18);
+      border-radius: 14px;
+      background: rgba(246,250,255,.76);
+      padding: 9px;
+      min-width: 0;
+    }
+
+    .inspector-mini small {
+      display: block;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-size: 9px;
+      font-weight: 950;
+      line-height: 1.15;
+    }
+
+    .inspector-mini strong {
+      display: block;
+      margin-top: 5px;
+      color: #0b1f3a;
+      font-size: 12px;
+      line-height: 1.25;
+      font-weight: 900;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .inspector-action-box {
+      border: 1px solid rgba(120,150,180,.20);
+      border-left: 4px solid var(--blue);
+      border-radius: 15px;
+      background: linear-gradient(180deg, rgba(255,255,255,.80), rgba(246,250,255,.74));
+      padding: 10px;
+    }
+
+    .inspector-action-title {
+      color: #0b1f3a;
+      font-size: 10.5px;
+      font-weight: 950;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
+    .inspector-action-text {
+      margin-top: 5px;
+      color: #475569;
+      font-size: 12px;
+      line-height: 1.38;
+    }
+
     .detail-row {
       display: grid;
       grid-template-columns: 120px minmax(0, 1fr);
@@ -2751,7 +2870,109 @@
       },
 
       inspectorDetails(type, item) {
+        if (type === 'class') return this.classInspector(item);
+        if (type === 'incident') return this.incidentInspector(item);
+        if (type === 'telegram') return this.telegramInspector(item);
         return Object.entries(item).map(([k, v]) => this.detailRow(k, typeof v === 'object' ? JSON.stringify(v) : v)).join('');
+      },
+
+      classInspector(c) {
+        const tone = VisionUtils.classSeverityClass(c);
+        return `
+          <div class="inspector-hero ${tone}">
+            <div class="inspector-hero-title">${VisionUtils.esc(c.sigla)}</div>
+            <div class="inspector-hero-subtitle">${VisionUtils.esc(c.asignatura)} · ${VisionUtils.esc(c.programa || 'Programa no informado')}</div>
+            <div class="class-badges" style="margin-top:10px;">${VisionComponents.badge(c.estado, VisionUtils.badgeClass(c.estado))}${VisionComponents.badge(c.zoomActivo ? 'ZOOM ACTIVO' : 'ZOOM NO ACTIVO', c.zoomActivo ? 'ok' : 'neutral')}</div>
+          </div>
+          <section class="inspector-section">
+            <div class="inspector-section-head"><div class="inspector-section-title">Datos de clase</div></div>
+            <div class="inspector-section-body">
+              <div class="inspector-mini-grid">
+                ${this.inspectorMini('Profesor/a', c.profesor)}
+                ${this.inspectorMini('Horario', (c.horaInicio || '—') + ' - ' + (c.horaFin || '—'))}
+                ${this.inspectorMini('Fecha', c.fecha || 'No informada')}
+                ${this.inspectorMini('Meeting ID', c.meetingId || 'No informado')}
+              </div>
+            </div>
+          </section>
+          <section class="inspector-section">
+            <div class="inspector-section-head"><div class="inspector-section-title">Participación observada</div></div>
+            <div class="inspector-section-body">
+              <div class="inspector-mini-grid">
+                ${this.inspectorMini('Participantes', c.participantes)}
+                ${this.inspectorMini('Agendados', c.agendados)}
+                ${this.inspectorMini('Asistencia', (c.asistenciaPct || 0) + '%')}
+                ${this.inspectorMini('Avance', (c.avancePct || 0) + '%')}
+              </div>
+            </div>
+          </section>
+          <div class="inspector-action-box">
+            <div class="inspector-action-title">Acción sugerida / observación</div>
+            <div class="inspector-action-text">${VisionUtils.esc(c.accionSugerida || c.observacion || 'Sin acción sugerida registrada.')}</div>
+          </div>`;
+      },
+
+      incidentInspector(i) {
+        const tone = VisionUtils.badgeClass(i.severidad || i.estadoDetectado || i.estadoRevision);
+        return `
+          <div class="inspector-hero ${tone}">
+            <div class="inspector-hero-title">${VisionUtils.esc(i.sigla)}</div>
+            <div class="inspector-hero-subtitle">${VisionUtils.esc(i.estadoDetectado)} · ${VisionUtils.esc(i.asignatura || 'Asignatura no informada')}</div>
+            <div class="class-badges" style="margin-top:10px;">${VisionComponents.badge(i.severidad || 'INCIDENCIA', tone)}${VisionComponents.badge(i.estadoIncidencia || 'SIN ESTADO', VisionUtils.badgeClass(i.estadoIncidencia))}</div>
+          </div>
+          <section class="inspector-section">
+            <div class="inspector-section-head"><div class="inspector-section-title">Gestión del caso</div></div>
+            <div class="inspector-section-body">
+              <div class="inspector-mini-grid">
+                ${this.inspectorMini('Estado caso', i.estadoIncidencia || 'No informado')}
+                ${this.inspectorMini('Revisión', i.estadoRevision || 'Pendiente')}
+                ${this.inspectorMini('Responsable', i.responsable || 'Sin responsable')}
+                ${this.inspectorMini('Fecha clase', i.fechaClase || 'No informada')}
+              </div>
+            </div>
+          </section>
+          <section class="inspector-section">
+            <div class="inspector-section-head"><div class="inspector-section-title">Contexto académico</div></div>
+            <div class="inspector-section-body">
+              <div class="inspector-mini-grid">
+                ${this.inspectorMini('Profesor/a', i.profesor || 'No informado')}
+                ${this.inspectorMini('Programa', i.programa || 'No informado')}
+              </div>
+            </div>
+          </section>
+          <div class="inspector-action-box">
+            <div class="inspector-action-title">Acción / observación de gestión</div>
+            <div class="inspector-action-text">${VisionUtils.esc(i.observacion || i.accion || 'Sin acción registrada para esta incidencia.')}</div>
+          </div>`;
+      },
+
+      telegramInspector(t) {
+        const tone = VisionUtils.badgeClass(t.resultado || t.tipo);
+        return `
+          <div class="inspector-hero ${tone}">
+            <div class="inspector-hero-title">${VisionUtils.esc(t.tipo)}</div>
+            <div class="inspector-hero-subtitle">${VisionUtils.esc(t.sigla || 'Sin sigla asociada')} · Canal Telegram</div>
+            <div class="class-badges" style="margin-top:10px;">${VisionComponents.badge(t.resultado || 'LOG', tone)}</div>
+          </div>
+          <section class="inspector-section">
+            <div class="inspector-section-head"><div class="inspector-section-title">Trazabilidad del mensaje</div></div>
+            <div class="inspector-section-body">
+              <div class="inspector-mini-grid">
+                ${this.inspectorMini('Destinatario', t.destinatario || 'No informado')}
+                ${this.inspectorMini('Fecha/hora', t.fecha || t.hora || 'No informada')}
+                ${this.inspectorMini('Resultado', t.resultado || 'No informado')}
+                ${this.inspectorMini('Sigla', t.sigla || 'No aplica')}
+              </div>
+            </div>
+          </section>
+          <div class="inspector-action-box">
+            <div class="inspector-action-title">Mensaje / evidencia comunicacional</div>
+            <div class="inspector-action-text">${VisionUtils.esc(t.mensaje || 'Sin texto registrado para este mensaje.')}</div>
+          </div>`;
+      },
+
+      inspectorMini(label, value) {
+        return `<div class="inspector-mini"><small>${VisionUtils.esc(label)}</small><strong>${VisionUtils.esc(value || '—')}</strong></div>`;
       },
 
       detailRow(k, v) {
