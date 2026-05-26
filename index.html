@@ -31,11 +31,11 @@
       --radius-lg: 8px;
       --radius-md: 6px;
       --radius-sm: 4px;
-      --topbar-h: 54px;
-      --ribbon-h: 112px;
-      --statusbar-h: 32px;
-      --sidebar-w: 250px;
-      --inspector-w: 360px;
+      --topbar-h: 46px;
+      --ribbon-h: 98px;
+      --statusbar-h: 28px;
+      --sidebar-w: 242px;
+      --inspector-w: 348px;
       --font: "Segoe UI", Arial, sans-serif;
     }
 
@@ -73,8 +73,8 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
-      gap: 12px;
-      padding: 8px 12px;
+      gap: 10px;
+      padding: 6px 10px;
       color: #eef7ff;
       border-bottom: 1px solid rgba(148, 184, 220, .18);
       background: rgba(8, 18, 34, .72);
@@ -89,8 +89,8 @@
     }
 
     .brand-mark {
-      width: 38px;
-      height: 38px;
+      width: 32px;
+      height: 32px;
       flex: 0 0 auto;
       border-radius: 14px;
       display: grid;
@@ -116,15 +116,15 @@
     .brand-text { min-width: 0; }
 
     .brand-title {
-      font-weight: 950;
-      letter-spacing: -.03em;
+      font-weight: 700;
+      letter-spacing: -.02em;
       line-height: 1.05;
-      font-size: 16px;
+      font-size: 15px;
     }
 
     .brand-subtitle {
       margin-top: 1px;
-      font-size: 11px;
+      font-size: 10px;
       color: rgba(234, 246, 255, .74);
       white-space: nowrap;
       overflow: hidden;
@@ -142,14 +142,14 @@
     .pill {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      min-height: 28px;
-      padding: 6px 10px;
+      gap: 6px;
+      min-height: 24px;
+      padding: 4px 8px;
       border-radius: 999px;
       border: 1px solid rgba(255,255,255,.16);
       background: rgba(255,255,255,.08);
       color: rgba(238,247,255,.88);
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 850;
       white-space: nowrap;
     }
@@ -180,7 +180,7 @@
     .ribbon {
       height: var(--ribbon-h);
       display: grid;
-      grid-template-rows: 34px minmax(0, 1fr);
+      grid-template-rows: 30px minmax(0, 1fr);
       color: #eef7ff;
       border-bottom: 1px solid rgba(148, 184, 220, .18);
       background: linear-gradient(180deg, rgba(12, 28, 51, .98), rgba(10, 22, 39, .94));
@@ -198,12 +198,12 @@
     .ribbon-file-tab,
     .ribbon-tab {
       appearance: none;
-      height: 30px;
-      padding: 0 13px;
+      height: 27px;
+      padding: 0 11px;
       border: 1px solid transparent;
       border-radius: 9px 9px 0 0;
       font-weight: 850;
-      font-size: 12px;
+      font-size: 11px;
       white-space: nowrap;
     }
 
@@ -231,7 +231,7 @@
       display: flex;
       align-items: stretch;
       gap: 8px;
-      padding: 8px 10px 9px;
+      padding: 7px 9px 8px;
       overflow-x: auto;
       background:
         linear-gradient(90deg, rgba(84,182,255,.07), transparent 28%, rgba(118,87,216,.06)),
@@ -239,13 +239,13 @@
     }
 
     .ribbon-group {
-      min-width: 146px;
+      min-width: 132px;
       display: grid;
       grid-template-rows: 1fr 16px;
-      gap: 4px;
+      gap: 3px;
       border: 1px solid rgba(255,255,255,.105);
-      border-radius: 11px;
-      padding: 7px;
+      border-radius: 8px;
+      padding: 6px;
       background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.038));
       box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
       position: relative;
@@ -275,8 +275,8 @@
       border-radius: 9px;
       background: rgba(255,255,255,.075);
       color: rgba(238,247,255,.88);
-      min-width: 54px;
-      padding: 6px 7px;
+      min-width: 50px;
+      padding: 5px 6px;
       display: grid;
       place-items: center;
       gap: 3px;
@@ -289,7 +289,7 @@
     .ribbon-btn:hover { background: rgba(255,255,255,.14); transform: translateY(-1px); }
     .ribbon-btn.primary { background: linear-gradient(135deg, var(--blue), var(--blue-2)); border-color: rgba(126,231,255,.45); color: #fff; }
 
-    .ribbon-icon { font-size: 17px; line-height: 1; }
+    .ribbon-icon { font-size: 15px; line-height: 1; }
     .ribbon-label { text-align: center; color: rgba(238,247,255,.68); font-size: 10px; font-weight: 900; letter-spacing: .02em; }
 
     .backstage-summary {
@@ -334,8 +334,8 @@
       min-height: 0;
       display: grid;
       grid-template-columns: var(--sidebar-w) minmax(0, 1fr) var(--inspector-w);
-      gap: 10px;
-      padding: 10px;
+      gap: 8px;
+      padding: 8px;
       overflow: hidden;
     }
 
@@ -458,7 +458,7 @@
       display: grid;
       gap: 6px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10.5px;
     }
 
     .main {
@@ -1734,8 +1734,8 @@
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
-      gap: 12px;
-      padding: 0 12px;
+      gap: 10px;
+      padding: 0 10px;
       color: rgba(238,247,255,.78);
       border-top: 1px solid rgba(148,184,220,.18);
       background: rgba(7, 14, 25, .86);
