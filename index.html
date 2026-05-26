@@ -2424,10 +2424,55 @@
     /***********************************************************
      * 1. Configuración
      ***********************************************************/
+    /***********************************************************
+     * 0. Arranque seguro
+     ***********************************************************/
+    const VisionBoot = {
+      storageGet(key, fallback = '') {
+        try {
+          return window.localStorage ? (window.localStorage.getItem(key) || fallback) : fallback;
+        } catch (err) {
+          console.warn('localStorage no disponible:', err);
+          return fallback;
+        }
+      },
+      storageSet(key, value) {
+        try {
+          if (window.localStorage) window.localStorage.setItem(key, value);
+        } catch (err) {
+          console.warn('No se pudo guardar en localStorage:', err);
+        }
+      },
+      storageRemove(key) {
+        try {
+          if (window.localStorage) window.localStorage.removeItem(key);
+        } catch (err) {
+          console.warn('No se pudo limpiar localStorage:', err);
+        }
+      },
+      showFatalError(err) {
+        const loader = document.getElementById('loader');
+        const subtitle = document.getElementById('loaderSubtitle');
+        const foot = document.getElementById('loaderFoot');
+        if (loader) loader.classList.remove('hidden');
+        if (subtitle) subtitle.textContent = 'No se pudo inicializar Visión.';
+        if (foot) foot.textContent = (err && err.message) ? err.message : String(err || 'Error desconocido');
+        console.error('Error fatal de inicialización Visión:', err);
+      }
+    };
+
+    window.addEventListener('error', event => {
+      VisionBoot.showFatalError(event.error || event.message);
+    });
+
+    window.addEventListener('unhandledrejection', event => {
+      VisionBoot.showFatalError(event.reason || 'Promesa rechazada sin capturar.');
+    });
+
     const VisionConfig = {
       // Puede quedar hardcodeada aquí o cargarse desde Configuración en la interfaz.
       // Ejemplo: https://script.google.com/macros/s/AKfycb.../exec
-      GAS_WEB_APP_URL: localStorage.getItem('VISION_GAS_WEB_APP_URL') || '',
+      GAS_WEB_APP_URL: VisionBoot.storageGet('VISION_GAS_WEB_APP_URL', ''),
 
       refreshSeconds: 180,
       useMockWhenNoUrl: true,
@@ -3964,14 +4009,14 @@
           alert('Debes ingresar la URL publicada del Web App de Apps Script.');
           return;
         }
-        localStorage.setItem('VISION_GAS_WEB_APP_URL', url);
+        VisionBoot.storageSet('VISION_GAS_WEB_APP_URL', url);
         VisionConfig.GAS_WEB_APP_URL = url;
         VisionState.normalized.saludImplementacion = null;
         VisionApp.loadLive();
       },
 
       clearBackendUrl() {
-        localStorage.removeItem('VISION_GAS_WEB_APP_URL');
+        VisionBoot.storageRemove('VISION_GAS_WEB_APP_URL');
         VisionConfig.GAS_WEB_APP_URL = '';
         VisionState.normalized.saludImplementacion = null;
         VisionApp.loadLive();
@@ -4331,7 +4376,11 @@
       }
     };
 
-    VisionApp.init();
+    try {
+      VisionApp.init();
+    } catch (err) {
+      VisionBoot.showFatalError(err);
+    }
   </script>
 </body>
 </html>
