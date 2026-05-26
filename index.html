@@ -1846,6 +1846,53 @@
       font-variant-numeric: tabular-nums;
     }
 
+    .backend-checklist {
+      display: grid;
+      gap: 8px;
+    }
+
+    .backend-route {
+      display: grid;
+      grid-template-columns: minmax(190px, .85fr) minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid rgba(120,150,180,.16);
+      border-radius: var(--radius-md);
+      background: #fff;
+      padding: 8px 9px;
+      font-size: 11.5px;
+    }
+
+    .backend-route-action {
+      color: #0b1f3a;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .backend-route-handler {
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 11px;
+    }
+
+    .code-box {
+      border: 1px solid rgba(120,150,180,.18);
+      border-radius: var(--radius-md);
+      background: #0b1220;
+      color: #eaf6ff;
+      padding: 10px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 11px;
+      line-height: 1.45;
+      overflow: auto;
+      white-space: pre;
+    }
+
     /* =========================================================
        Loader
        ========================================================= */
@@ -3306,6 +3353,16 @@
             </div>
           </section>
           <section class="panel" style="margin-top:12px;">
+            <div class="panel-header">
+              <div><h2 class="panel-title">Rutas backend requeridas en doGet</h2><div class="panel-subtitle">Checklist mínimo para que Visión vNext lea operación, analítica, GO, salud y Moodle.</div></div>
+              <button class="action-btn" onclick="VisionActions.copyDoGetRoutes()">Copiar bloque doGet</button>
+            </div>
+            <div class="panel-body backend-checklist">
+              ${this.backendRoutesRows()}
+              <pre class="code-box" id="doGetRoutesSnippet">${VisionUtils.esc(this.doGetRoutesSnippet())}</pre>
+            </div>
+          </section>
+          <section class="panel" style="margin-top:12px;">
             <div class="panel-header"><div><h2 class="panel-title">Estado técnico visible</h2><div class="panel-subtitle">Parámetros frontend y lectura del snapshot.</div></div></div>
             <div class="panel-body detail-grid">
               ${this.detailRow('Frontend', VisionConfig.version)}
@@ -3333,6 +3390,79 @@
             <div class="endpoint-detail">${VisionUtils.esc(r.modulo || r.error || r.status || 'Sin detalle')}</div>
             <div class="endpoint-latency">${VisionUtils.esc(r.latencyMs || 0)} ms</div>
           </div>`).join('');
+      },
+
+      backendRoutesRows() {
+        return this.backendRoutes().map(r => `
+          <div class="backend-route">
+            <div class="backend-route-action">${VisionUtils.esc(r.action)}</div>
+            <div class="backend-route-handler">${VisionUtils.esc(r.handler)}</div>
+            <div>${VisionComponents.badge(r.required ? 'REQUERIDO' : 'OPCIONAL', r.required ? 'info' : 'neutral')}</div>
+          </div>`).join('');
+      },
+
+      backendRoutes() {
+        return [
+          { action: 'visionLiveOperationsSnapshot', handler: 'VL_handleVisionLiveOperationsSnapshot_(e)', required: true },
+          { action: 'visionExecutiveSnapshot', handler: 'VE_handleVisionExecutiveSnapshot_(e)', required: true },
+          { action: 'visionAnalyticsSnapshotV2', handler: 'VAZ_handleVisionAnalyticsSnapshotV2_(e)', required: true },
+          { action: 'visionGoSatelliteSnapshot', handler: 'GS_handleGoSatelliteSnapshot_(e)', required: true },
+          { action: 'visionImplementationHealthSnapshot', handler: 'IH_handleImplementationHealthSnapshot_(e)', required: true },
+          { action: 'visionMoodleImplementationProbeSnapshot', handler: 'IMP_handleMoodleImplementationProbeSnapshot_(e)', required: true },
+          { action: 'visionRunMoodleImplementationProbe', handler: 'IMP_handleRunMoodleImplementationProbe_(e)', required: true },
+          { action: 'legacyZoomDashboard', handler: 'VE_handleDashboardZoomLegacy_(e)', required: false }
+        ];
+      },
+
+      doGetRoutesSnippet() {
+        return `function doGet(e) {
+  e = e || { parameter: {} };
+  const action = String(e.parameter.action || '').trim();
+
+  if (action === 'visionExecutiveSnapshot') {
+    return VE_handleVisionExecutiveSnapshot_(e);
+  }
+
+  if (action === 'visionAnalyticsSnapshot') {
+    return VA_handleVisionAnalyticsSnapshot_(e);
+  }
+
+  if (action === 'visionAnalyticsSnapshotV2') {
+    return VAZ_handleVisionAnalyticsSnapshotV2_(e);
+  }
+
+  if (action === 'visionGoSatelliteSnapshot') {
+    return GS_handleGoSatelliteSnapshot_(e);
+  }
+
+  if (action === 'visionImplementationHealthSnapshot') {
+    return IH_handleImplementationHealthSnapshot_(e);
+  }
+
+  if (action === 'visionMoodleImplementationProbeSnapshot') {
+    return IMP_handleMoodleImplementationProbeSnapshot_(e);
+  }
+
+  if (action === 'visionRunMoodleImplementationProbe') {
+    return IMP_handleRunMoodleImplementationProbe_(e);
+  }
+
+  if (action === 'visionLiveOperationsSnapshot') {
+    return VL_handleVisionLiveOperationsSnapshot_(e);
+  }
+
+  if (!action || action === 'legacyZoomDashboard') {
+    return VE_handleDashboardZoomLegacy_(e);
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify({
+      ok: false,
+      error: 'Acción no reconocida.',
+      action: action
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
       },
 
       placeholder(text) {
@@ -3699,6 +3829,22 @@
           );
           VisionViews.render();
         }
+      },
+
+      copyDoGetRoutes() {
+        const text = VisionViews.doGetRoutesSnippet();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(() => alert('Bloque doGet copiado al portapapeles.'));
+          return;
+        }
+
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        alert('Bloque doGet copiado al portapapeles.');
       }
     };
 
