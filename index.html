@@ -2476,7 +2476,7 @@
       useMockWhenNoUrl: true,
       allowRuntimeBackendConfig: true,
       defaultTab: 'operacion',
-      version: 'vNext Sprint 1',
+      version: 'vNext Sprint 1.p',
 
       endpoints: {
         live: 'visionLiveOperationsSnapshot',
@@ -2744,9 +2744,9 @@
         const notif = raw?.notificaciones || {};
         const bandeja = raw?.bandeja || {};
 
-        const clasesSource = live.clases || live.items || raw?.clases || raw?.motor?.clases || [];
-        const incidenciasSource = inc.items || inc.abiertasItems || raw?.bandeja?.items || raw?.incidencias?.items || [];
-        const telegramSource = notif.items || notif.ultimas || raw?.notificaciones?.items || [];
+        const clasesSource = live.clases || live.detalleClases || live.items || raw?.clases || raw?.motor?.clases || [];
+        const incidenciasSource = inc.items || inc.detalleIncidencias || inc.ultimas || inc.abiertasItems || raw?.bandeja?.items || raw?.incidencias?.items || [];
+        const telegramSource = notif.items || notif.detalleNotificaciones || notif.ultimas || raw?.notificaciones?.items || [];
 
         const clases = Array.isArray(clasesSource)
           ? clasesSource.map((c, index) => this.classItem(c, index))
@@ -2827,42 +2827,44 @@
 
       implementationItem(r, index) {
         const v = VisionUtils;
+        const n = r.nodos || {};
+        const countNode = estado => Object.values(n).filter(x => String(x || '').toUpperCase() === estado).length;
         return {
-          id: v.text(r.sigla_curso || r.sigla || 'impl-' + index),
-          sigla: v.text(r.sigla_curso || r.sigla, 'Sin sigla'),
+          id: v.text(r.sigla_curso || r.siglaCurso || r.sigla || 'impl-' + index),
+          sigla: v.text(r.sigla_curso || r.siglaCurso || r.sigla, 'Sin sigla'),
           programa: v.text(r.programa, ''),
           asignatura: v.text(r.asignatura, ''),
           profesor: v.text(r.profesor, ''),
-          fecha: v.text(r.fecha_clase, ''),
-          horario: [v.text(r.hora_inicio, ''), v.text(r.hora_fin, '')].filter(Boolean).join(' - '),
-          estado: v.text(r.estado_implementacion, 'SIN_ESTADO'),
-          puntaje: v.num(r.puntaje_implementacion, 0),
-          confianza: v.text(r.nivel_confianza, ''),
-          prioridad: v.text(r.prioridad_revision, ''),
-          nodosOk: v.num(r.nodos_ok, 0),
-          nodosObservar: v.num(r.nodos_observar, 0),
-          nodosError: v.num(r.nodos_error, 0),
-          nodosPendiente: v.num(r.nodos_pendiente_validar, 0),
-          nodosNoAplica: v.num(r.nodos_no_aplica, 0),
-          estadoCurso: v.text(r.estado_curso, ''),
+          fecha: v.text(r.fecha_clase || r.fechaClase, ''),
+          horario: [v.text(r.hora_inicio || r.horaInicio, ''), v.text(r.hora_fin || r.horaFin, '')].filter(Boolean).join(' - '),
+          estado: v.text(r.estado_implementacion || r.estadoImplementacion, 'SIN_ESTADO'),
+          puntaje: v.num(r.puntaje_implementacion ?? r.puntajeImplementacion, 0),
+          confianza: v.text(r.nivel_confianza || r.nivelConfianza, ''),
+          prioridad: v.text(r.prioridad_revision || r.prioridadRevision, ''),
+          nodosOk: v.num(r.nodos_ok, countNode('OK')),
+          nodosObservar: v.num(r.nodos_observar, countNode('OBSERVAR')),
+          nodosError: v.num(r.nodos_error, countNode('ERROR')),
+          nodosPendiente: v.num(r.nodos_pendiente_validar, countNode('FALTA_VALIDAR')),
+          nodosNoAplica: v.num(r.nodos_no_aplica, countNode('NO_APLICA')),
+          estadoCurso: v.text(r.estado_curso || r.estadoCurso, ''),
           agendados: v.num(r.agendados, 0),
-          meetingId: v.text(r.meeting_id, ''),
-          evidenciaZoom: v.text(r.evidencia_zoom, ''),
-          estadoZoomAuditado: v.text(r.estado_zoom_auditado, ''),
-          estadoModeloGo: v.text(r.estado_modelo_go, ''),
+          meetingId: v.text(r.meeting_id || r.meetingId, ''),
+          evidenciaZoom: v.text(r.evidencia_zoom || r.evidenciaZoom, ''),
+          estadoZoomAuditado: v.text(r.estado_zoom_auditado || r.estadoZoomAuditado, ''),
+          estadoModeloGo: v.text(r.estado_modelo_go || r.estadoModeloGo, ''),
           observacion: v.text(r.observacion, ''),
-          accion: v.text(r.accion_recomendada, ''),
+          accion: v.text(r.accion_recomendada || r.accionRecomendada, ''),
+          nodos: n,
           raw: r
         };
       },
 
       moodleProbe(raw, siglaFallback = '') {
         if (!raw) return null;
-        if (raw.ultimoDiagnostico) return raw.ultimoDiagnostico;
-        if (raw.diagnostico) return raw.diagnostico;
-        if (Array.isArray(raw.items) && raw.items.length) return raw.items[0];
-        if (Array.isArray(raw.rows) && raw.rows.length) return raw.rows[0];
-        if (raw.sigla_curso || raw.estado_general || raw.puntaje || raw.prioridad) return raw;
+        const source = raw.ultimoDiagnostico || raw.diagnostico || (Array.isArray(raw.items) && raw.items.length ? raw.items[0] : null) || (Array.isArray(raw.rows) && raw.rows.length ? raw.rows[0] : null) || raw;
+        if (source.sigla_curso || source.siglaCurso || source.estado_general || source.estadoGeneral || source.puntaje || source.prioridad || source.nodos) {
+          return this.normalizeMoodleProbe(source, siglaFallback);
+        }
         return {
           sigla_curso: siglaFallback || 'Sin sigla',
           estado_general: raw.ok === false ? 'ERROR' : 'SIN_DETALLE',
@@ -2873,33 +2875,83 @@
         };
       },
 
+      normalizeMoodleProbe(source, siglaFallback = '') {
+        const s = source || {};
+        const n = s.nodos || {};
+        return {
+          ...s,
+          sigla_curso: VisionUtils.text(s.sigla_curso || s.siglaCurso, siglaFallback || 'Sin sigla'),
+          fecha_clase: VisionUtils.text(s.fecha_clase || s.fechaClase, ''),
+          shortname_moodle_esperado: VisionUtils.text(s.shortname_moodle_esperado || s.shortnameMoodleEsperado, ''),
+          course_id: VisionUtils.text(s.course_id || s.courseId, ''),
+          course_fullname: VisionUtils.text(s.course_fullname || s.courseFullname, ''),
+          profile_field_esperado: VisionUtils.text(s.profile_field_esperado || s.profileFieldEsperado, ''),
+          estado_general: VisionUtils.text(s.estado_general || s.estadoGeneral, 'SIN_ESTADO'),
+          puntaje: VisionUtils.num(s.puntaje, 0),
+          prioridad: VisionUtils.text(s.prioridad, ''),
+          resumen_evidencia: VisionUtils.text(s.resumen_evidencia || s.resumenEvidencia, ''),
+          resumen_comparacion: VisionUtils.text(s.resumen_comparacion || s.resumenComparacion, ''),
+          observacion: VisionUtils.text(s.observacion, ''),
+          accion_recomendada: VisionUtils.text(s.accion_recomendada || s.accionRecomendada, ''),
+          verificaciones_confirmadas: s.verificaciones_confirmadas || s.verificacionesConfirmadas || [],
+          validaciones_pendientes: s.validaciones_pendientes || s.validacionesPendientes || [],
+          brechas_detectadas: s.brechas_detectadas || s.brechasDetectadas || [],
+          matriz_comparacion: s.matriz_comparacion || s.matrizComparacion || [],
+          datos_cursos: s.datos_cursos || s.datosCursos || {},
+          datos_moodle: s.datos_moodle || s.datosMoodle || {},
+          nodo_cursos: s.nodo_cursos || n.cursos || '',
+          nodo_moodle_curso: s.nodo_moodle_curso || n.moodleCurso || '',
+          nodo_cohorte: s.nodo_cohorte || n.cohorte || '',
+          nodo_grupo: s.nodo_grupo || n.grupo || '',
+          nodo_recurso_asistencia: s.nodo_recurso_asistencia || n.recursoAsistencia || '',
+          nodo_restricciones_asistencia: s.nodo_restricciones_asistencia || n.restriccionesAsistencia || '',
+          nodo_recurso_zoom: s.nodo_recurso_zoom || n.recursoZoom || '',
+          nodo_html_zoom: s.nodo_html_zoom || n.htmlZoom || '',
+          nodo_restricciones_zoom: s.nodo_restricciones_zoom || n.restriccionesZoom || '',
+          nodo_profesor_matriculado: s.nodo_profesor_matriculado || n.profesorMatriculado || '',
+          nodo_profesor_grupo: s.nodo_profesor_grupo || n.profesorGrupo || '',
+          nodo_regla_perfil_cohorte: s.nodo_regla_perfil_cohorte || n.reglaPerfilCohorte || ''
+        };
+      },
+
       classItem(c, index) {
         const v = VisionUtils;
         const asistenciaRaw = c.asistenciaPct ?? c.asistenciaObservadaPct ?? c.porcentajeAsistencia ?? c.asistencia_observada_pct;
-        const participantes = v.num(c.participantes ?? c.maxParticipantes ?? c.participantesTotal, 0);
-        const agendados = v.num(c.agendados ?? c.maxAgendados ?? c.agendadosTotal, 0);
+        const participantes = v.num(c.participantes ?? c.maxParticipantes ?? c.max_participantes ?? c.participantesTotal, 0);
+        const agendados = v.num(c.agendados ?? c.maxAgendados ?? c.max_agendados ?? c.agendadosTotal, 0);
         const asistenciaPct = asistenciaRaw !== undefined && asistenciaRaw !== ''
           ? v.pct(asistenciaRaw)
           : agendados > 0 ? Math.round((participantes / agendados) * 100) : 0;
+
+        const estadoDerivado = c.estado || c.estadoCalculado || c.estado_calculado ||
+          (c.noIniciada || c.no_iniciada ? 'NO_INICIADA' :
+            c.bajaAsistencia || c.baja_asistencia ? 'BAJA_ASISTENCIA' :
+              c.iniciadaNormal || c.iniciada_normal ? 'INICIADA_NORMAL' :
+                c.finalizada ? 'FINALIZADA' :
+                  c.zoomActivo || c.zoom_activo ? 'INICIADA' : 'SIN_ESTADO');
+
+        const severidadDerivada = c.severidad ||
+          (/NO_INICIADA/i.test(estadoDerivado) ? 'CRITICA' :
+            /BAJA_ASISTENCIA/i.test(estadoDerivado) ? 'ALTA' : 'INFO');
 
         const out = {
           id: v.text(c.id || c.sigla || c.sigla_curso, 'clase-' + index),
           sigla: v.text(c.sigla || c.sigla_curso || c.curso, 'Sin sigla'),
           programa: v.text(c.programa, ''),
-          asignatura: v.text(c.asignatura, 'Asignatura no informada'),
+          asignatura: v.text(c.asignatura || c.nombre_asignatura, 'Clase monitoreada desde EVENTOS_CLASE'),
           profesor: v.text(c.profesor || c.docente || c.profesor_rankeado, 'Profesor/a no informado'),
           fecha: v.text(c.fecha || c.fecha_clase, ''),
           horaInicio: v.text(c.horaInicio || c.inicio || c.hora_programada || c.hora_inicio, ''),
           horaFin: v.text(c.horaFin || c.fin || c.hora_fin, ''),
-          estado: v.text(c.estado || c.estadoCalculado || c.estado_calculado, 'SIN_ESTADO'),
-          severidad: v.text(c.severidad, ''),
+          estado: v.text(estadoDerivado, 'SIN_ESTADO'),
+          severidad: v.text(severidadDerivada, ''),
           zoomActivo: Boolean(c.zoomActivo ?? c.zoom_activo ?? c.live),
           participantes,
           agendados,
           asistenciaPct,
           avancePct: v.estimateProgress({ ...c, horaInicio: c.horaInicio || c.inicio || c.hora_programada || c.hora_inicio, horaFin: c.horaFin || c.fin || c.hora_fin }),
           accionSugerida: v.text(c.accionSugerida || c.accion_sugerida || c.accion, ''),
-          observacion: v.text(c.observacion || c.detalle || c.evaluacion, ''),
+          observacion: v.text(c.observacion || c.detalle || c.evaluacion || (c.eventos ? 'Clase agregada desde ' + c.eventos + ' eventos de EVENTOS_CLASE.' : ''), ''),
           meetingId: v.text(c.meetingId || c.meeting_id, ''),
           linkZoom: v.text(c.linkZoom || c.link_zoom, '')
         };
@@ -2930,11 +2982,11 @@
         const v = VisionUtils;
         return {
           id: v.text(t.id || t.clave || t.id_notificacion, 'tg-' + index),
-          fecha: v.text(t.fecha || t.fecha_clase || t.timestamp_envio, ''),
+          fecha: v.text(t.fecha || t.fecha_clase || t.timestamp_envio || t.timestamp, ''),
           hora: v.text(t.hora || '', ''),
           tipo: v.text(t.tipo || t.tipo_notificacion || t.evento, 'NOTIFICACION'),
-          resultado: v.text(t.resultado || t.estado || 'ENVIADO', ''),
-          destinatario: v.text(t.destinatario || t.nombre || t.chat_id, ''),
+          resultado: v.text(t.resultado || t.resultado_envio || t.estado || 'ENVIADO', ''),
+          destinatario: v.text(t.destinatario || t.nombre || t.chat_id || t.chat_destino, ''),
           sigla: v.text(t.sigla || t.sigla_curso, ''),
           mensaje: v.text(t.mensaje || t.texto || t.respuesta || t.detalle, '')
         };
@@ -3641,6 +3693,23 @@
 
       extractMoodleNodes(probe) {
         const explicit = [];
+        const labelMap = {
+          cursos: 'Curso existe en CURSOS',
+          moodleCurso: 'Curso Moodle',
+          cohorte: 'Cohorte',
+          grupo: 'Grupo',
+          recursoAsistencia: 'Recurso asistencia',
+          restriccionesAsistencia: 'Restricción asistencia',
+          recursoZoom: 'Recurso Zoom',
+          htmlZoom: 'HTML / iframe Zoom',
+          restriccionesZoom: 'Restricción Zoom',
+          profesorMatriculado: 'Profesor matriculado',
+          profesorGrupo: 'Profesor en grupo',
+          reglaPerfilCohorte: 'Regla perfil/cohorte'
+        };
+        if (probe?.nodos && typeof probe.nodos === 'object') {
+          Object.entries(probe.nodos).forEach(([k, v]) => explicit.push({ name: labelMap[k] || k.replace(/([A-Z])/g, ' $1'), status: String(v || ''), detail: '' }));
+        }
         try {
           const detail = typeof probe.detalle_json === 'string' ? JSON.parse(probe.detalle_json || '{}') : probe.detalle_json;
           const nodes = detail?.nodes || detail?.moodle?.nodes || [];
