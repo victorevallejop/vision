@@ -25,11 +25,12 @@
       --yellow: #b98000;
       --red: #d92d20;
       --purple: #7657d8;
-      --shadow: 0 18px 48px rgba(0, 0, 0, .22);
-      --shadow-soft: 0 10px 26px rgba(11, 31, 58, .11);
-      --radius-xl: 22px;
-      --radius-lg: 16px;
-      --radius-md: 12px;
+      --shadow: 0 10px 22px rgba(0, 0, 0, .14);
+      --shadow-soft: 0 4px 12px rgba(11, 31, 58, .06);
+      --radius-xl: 10px;
+      --radius-lg: 8px;
+      --radius-md: 6px;
+      --radius-sm: 4px;
       --topbar-h: 54px;
       --ribbon-h: 112px;
       --statusbar-h: 32px;
@@ -1851,6 +1852,293 @@
       color: var(--muted);
       font-size: 11px;
       font-weight: 800;
+    }
+
+    /* =========================================================
+       Refinamiento visual ejecutivo
+       Radios más finos, sombras más sobrias y look de aplicación
+       ========================================================= */
+    .sidebar,
+    .main,
+    .inspector,
+    .panel,
+    .assistant-readout,
+    .ops-board,
+    .comm-voice,
+    .comm-stats,
+    .loader-card {
+      border-radius: var(--radius-xl);
+    }
+
+    .kpi-card,
+    .class-card,
+    .case-card,
+    .telegram-card,
+    .incident-board-card,
+    .inspector-section,
+    .inspector-hero,
+    .timeline-item,
+    .mini-card,
+    .assistant-tile {
+      border-radius: var(--radius-lg);
+    }
+
+    .class-meta-card,
+    .case-node,
+    .telegram-node,
+    .inspector-mini,
+    .action-btn,
+    .ribbon-group,
+    .ribbon-btn,
+    .nav-item,
+    .nav-icon,
+    .ops-chip,
+    .comm-stat,
+    .case-action-box,
+    .telegram-message,
+    .inspector-action-box {
+      border-radius: var(--radius-md);
+    }
+
+    .brand-mark,
+    .assistant-avatar,
+    .readout-avatar,
+    .comm-icon,
+    .loader-bot {
+      border-radius: 9px;
+    }
+
+    .badge,
+    .pill,
+    .class-time-chip,
+    .readout-kicker,
+    .comm-kicker,
+    .timeline-time,
+    .nav-count {
+      border-radius: 999px;
+    }
+
+    .sidebar,
+    .main,
+    .inspector,
+    .panel,
+    .class-card,
+    .case-card,
+    .telegram-card,
+    .kpi-card,
+    .assistant-readout,
+    .ops-board,
+    .comm-voice,
+    .comm-stats {
+      box-shadow: var(--shadow-soft);
+    }
+
+    .class-card:hover,
+    .case-card:hover,
+    .telegram-card:hover {
+      box-shadow: 0 7px 16px rgba(11,31,58,.08);
+    }
+
+    .kpi-card,
+    .class-card,
+    .case-card,
+    .telegram-card,
+    .incident-board-card {
+      padding: 10px;
+    }
+
+    .panel-header,
+    .view-head,
+    .inspector-head,
+    .sidebar-head {
+      padding-top: 12px;
+      padding-bottom: 10px;
+    }
+
+    .panel-body,
+    .inspector-body {
+      padding: 10px 12px 12px;
+    }
+
+    .sidebar,
+    .main,
+    .inspector,
+    .panel,
+    .kpi-card,
+    .class-card,
+    .case-card,
+    .telegram-card,
+    .incident-board-card,
+    .inspector-section,
+    .comm-stat,
+    .ops-chip {
+      border-color: rgba(120,150,180,.16);
+    }
+
+    /* =========================================================
+       Refinamiento tipográfico ejecutivo
+       Menos negrita, más elegancia y lectura profesional
+       ========================================================= */
+    .brand-title,
+    .view-title,
+    .loader-title,
+    .readout-title,
+    .comm-title,
+    .inspector-hero-title,
+    .class-title,
+    .case-title,
+    .telegram-title {
+      font-weight: 700;
+      letter-spacing: -.02em;
+    }
+
+    .kpi-value,
+    .ops-chip-value,
+    .backstage-kpi strong,
+    .incident-board-value,
+    .comm-stat strong {
+      font-weight: 700;
+      letter-spacing: -.025em;
+    }
+
+    .panel-title,
+    .inspector-title,
+    .assistant-name,
+    .timeline-title,
+    .mini-title {
+      font-weight: 650;
+      letter-spacing: -.01em;
+    }
+
+    .kpi-label,
+    .ops-chip-label,
+    .backstage-kpi small,
+    .incident-board-label,
+    .comm-stat small,
+    .class-action-title,
+    .case-action-title,
+    .telegram-message-title,
+    .inspector-action-title,
+    .inspector-section-title,
+    .class-meta-card small,
+    .case-node small,
+    .telegram-node small,
+    .inspector-mini small,
+    .readout-kicker,
+    .comm-kicker {
+      font-weight: 600;
+      letter-spacing: .045em;
+    }
+
+    .ribbon-tab,
+    .ribbon-file-tab,
+    .ribbon-btn,
+    .ribbon-label,
+    .nav-item,
+    .action-btn,
+    .badge,
+    .pill,
+    .class-time-chip,
+    .timeline-time,
+    .timeline-voice,
+    .nav-count {
+      font-weight: 600;
+    }
+
+    .class-meta-card strong,
+    .case-node strong,
+    .telegram-node strong,
+    .inspector-mini strong,
+    .detail-value,
+    .class-meta b {
+      font-weight: 500;
+    }
+
+    .brand-subtitle,
+    .view-subtitle,
+    .panel-subtitle,
+    .inspector-subtitle,
+    .assistant-status,
+    .class-subtitle,
+    .case-subtitle,
+    .telegram-subtitle,
+    .readout-text,
+    .comm-text,
+    .class-action-text,
+    .case-action-text,
+    .telegram-message-text,
+    .inspector-action-text,
+    .timeline-text,
+    .mini-text,
+    .kpi-note,
+    .ops-chip-note,
+    .donut-caption {
+      font-weight: 400;
+    }
+
+    .donut-inner {
+      font-weight: 650;
+    }
+
+    /* =========================================================
+       Escala tipográfica más compacta
+       Reduce títulos/valores sobredimensionados sin perder jerarquía
+       ========================================================= */
+    .view-title {
+      font-size: 20px;
+      line-height: 1.08;
+    }
+
+    .loader-title {
+      font-size: 22px;
+    }
+
+    .readout-title,
+    .comm-title {
+      font-size: 16px;
+      line-height: 1.15;
+    }
+
+    .class-title {
+      font-size: 16px;
+      line-height: 1.16;
+    }
+
+    .case-title,
+    .telegram-title,
+    .inspector-hero-title {
+      font-size: 14px;
+      line-height: 1.18;
+    }
+
+    .panel-title {
+      font-size: 14px;
+    }
+
+    .inspector-title {
+      font-size: 15px;
+    }
+
+    .kpi-value {
+      font-size: 24px;
+    }
+
+    .ops-chip-value,
+    .comm-stat strong,
+    .incident-board-value {
+      font-size: 20px;
+    }
+
+    .backstage-kpi strong {
+      font-size: 17px;
+    }
+
+    .donut-inner {
+      font-size: 14px;
+    }
+
+    .brand-title {
+      font-size: 15px;
     }
 
     /* =========================================================
