@@ -1746,6 +1746,68 @@
     .statusbar-left { overflow: hidden; }
     .truncate { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
+    .config-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .config-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .config-label {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .045em;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .config-input {
+      width: 100%;
+      border: 1px solid rgba(120,150,180,.24);
+      border-radius: var(--radius-md);
+      background: #fff;
+      color: #0b1f3a;
+      padding: 9px 10px;
+      font-size: 12px;
+      outline: none;
+    }
+
+    .config-input:focus {
+      border-color: rgba(29,125,242,.45);
+      box-shadow: 0 0 0 3px rgba(29,125,242,.10);
+    }
+
+    .config-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .backend-warning {
+      border: 1px solid rgba(249,115,22,.22);
+      border-left: 4px solid var(--orange);
+      border-radius: var(--radius-lg);
+      background: rgba(255,247,237,.78);
+      color: #7c2d12;
+      padding: 10px;
+      font-size: 12px;
+      line-height: 1.38;
+    }
+
+    .backend-ok {
+      border: 1px solid rgba(31,157,99,.22);
+      border-left: 4px solid var(--green);
+      border-radius: var(--radius-lg);
+      background: rgba(240,253,244,.78);
+      color: #14532d;
+      padding: 10px;
+      font-size: 12px;
+      line-height: 1.38;
+    }
+
     /* =========================================================
        Loader
        ========================================================= */
@@ -2199,12 +2261,13 @@
      * 1. Configuración
      ***********************************************************/
     const VisionConfig = {
-      // Reemplazar por URL publicada del Web App de Apps Script.
+      // Puede quedar hardcodeada aquí o cargarse desde Configuración en la interfaz.
       // Ejemplo: https://script.google.com/macros/s/AKfycb.../exec
-      GAS_WEB_APP_URL: '',
+      GAS_WEB_APP_URL: localStorage.getItem('VISION_GAS_WEB_APP_URL') || '',
 
       refreshSeconds: 180,
       useMockWhenNoUrl: true,
+      allowRuntimeBackendConfig: true,
       defaultTab: 'operacion',
       version: 'vNext Sprint 1',
 
@@ -2865,6 +2928,7 @@
             <div class="topbar-status">
               <span class="pill ${tone}"><span class="pulse"></span>${VisionUtils.esc(operativo)}</span>
               <span class="pill info">${VisionUtils.esc(VisionConfig.version)}</span>
+              <span class="pill ${VisionConfig.GAS_WEB_APP_URL ? 'ok' : 'warn'}">${VisionConfig.GAS_WEB_APP_URL ? 'Backend real' : 'Mock local'}</span>
               <span class="pill">Último snapshot: ${VisionUtils.esc(s.generadoEn || '—')}</span>
               <span class="pill">Refresco: <span id="countdownTop">${VisionState.nextRefreshIn}</span>s</span>
             </div>
@@ -3151,13 +3215,34 @@
       viewConfig() {
         const s = VisionState.normalized.sistema;
         const e = VisionState.normalized.estado;
+        const backendConfigured = !!VisionConfig.GAS_WEB_APP_URL;
         return `
           <section class="panel">
+            <div class="panel-header"><div><h2 class="panel-title">Conexión backend</h2><div class="panel-subtitle">Permite pasar de mock local a operación real usando el Web App de Apps Script.</div></div></div>
+            <div class="panel-body config-grid">
+              <div class="${backendConfigured ? 'backend-ok' : 'backend-warning'}">
+                ${backendConfigured
+                  ? 'Frontend conectado a una URL de Apps Script. Las vistas consultarán snapshots reales del backend.'
+                  : 'El frontend está usando mock local. La interfaz funciona, pero todavía no está leyendo operación real.'}
+              </div>
+              <div class="config-field">
+                <label class="config-label" for="backendUrlInput">URL Web App Apps Script</label>
+                <input id="backendUrlInput" class="config-input" value="${VisionUtils.esc(VisionConfig.GAS_WEB_APP_URL)}" placeholder="https://script.google.com/macros/s/AKfycb.../exec" />
+              </div>
+              <div class="config-actions">
+                <button class="action-btn primary" onclick="VisionActions.saveBackendUrl()">Guardar URL y recargar snapshot</button>
+                <button class="action-btn" onclick="VisionActions.clearBackendUrl()">Volver a mock local</button>
+                <button class="action-btn" onclick="VisionActions.testLiveEndpoint()">Probar operación viva</button>
+              </div>
+            </div>
+          </section>
+          <section class="panel" style="margin-top:12px;">
             <div class="panel-header"><div><h2 class="panel-title">Estado técnico visible</h2><div class="panel-subtitle">Parámetros frontend y lectura del snapshot.</div></div></div>
             <div class="panel-body detail-grid">
               ${this.detailRow('Frontend', VisionConfig.version)}
-              ${this.detailRow('GAS URL configurada', VisionConfig.GAS_WEB_APP_URL ? 'SI' : 'NO · usando mock local')}
+              ${this.detailRow('Modo datos', backendConfigured ? 'BACKEND REAL' : 'MOCK LOCAL')}
               ${this.detailRow('Endpoint vivo', VisionConfig.endpoints.live)}
+              ${this.detailRow('Endpoint salud implementación', VisionConfig.endpoints.implementation)}
               ${this.detailRow('Fuente', s.fuente || '—')}
               ${this.detailRow('Generado en', s.generadoEn || '—')}
               ${this.detailRow('Estado operativo', e.operativo || '—')}
@@ -3469,6 +3554,38 @@
       scrollToPanel(id) {
         const el = document.getElementById(id);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      },
+
+      saveBackendUrl() {
+        const input = document.getElementById('backendUrlInput');
+        const url = String(input?.value || '').trim();
+        if (!url) {
+          alert('Debes ingresar la URL publicada del Web App de Apps Script.');
+          return;
+        }
+        localStorage.setItem('VISION_GAS_WEB_APP_URL', url);
+        VisionConfig.GAS_WEB_APP_URL = url;
+        VisionState.normalized.saludImplementacion = null;
+        VisionApp.loadLive();
+      },
+
+      clearBackendUrl() {
+        localStorage.removeItem('VISION_GAS_WEB_APP_URL');
+        VisionConfig.GAS_WEB_APP_URL = '';
+        VisionState.normalized.saludImplementacion = null;
+        VisionApp.loadLive();
+      },
+
+      async testLiveEndpoint() {
+        try {
+          const raw = await VisionAPI.getLiveSnapshot();
+          const ok = raw && raw.ok !== false;
+          alert(ok
+            ? 'Endpoint visionLiveOperationsSnapshot respondió correctamente.'
+            : 'El endpoint respondió, pero reportó ok=false. Revisa el backend.');
+        } catch (err) {
+          alert('No se pudo consultar visionLiveOperationsSnapshot: ' + err.message);
+        }
       }
     };
 
@@ -3571,6 +3688,7 @@
      ***********************************************************/
     const VisionMock = {
       get(action) {
+        if (action === VisionConfig.endpoints.implementation) return this.getImplementation();
         const now = new Date();
         return {
           ok: true,
@@ -3643,6 +3761,35 @@
             'Existe al menos una incidencia crítica abierta que requiere revisión inmediata.',
             'El frontend está en modo preview; al configurar GAS_WEB_APP_URL leerá datos reales del backend.'
           ]
+        };
+      },
+
+      getImplementation() {
+        const now = new Date();
+        return {
+          ok: true,
+          sistema: {
+            nombre: 'Visión',
+            modulo: 'Salud de Implementación de Cursos',
+            generadoEn: now.toLocaleString('es-CL')
+          },
+          resumen: {
+            total: 4,
+            criticos: 1,
+            enRiesgo: 1,
+            observar: 1,
+            ok: 1
+          },
+          criticos: [
+            { sigla_curso: '2026 EET CR HIS02', programa: 'EET', asignatura: 'Historia', profesor: 'Profesora Ana Rojas', fecha_clase: this.todayISO(), hora_inicio: this.shiftTime(-8), hora_fin: this.shiftTime(62), estado_implementacion: 'IMPLEMENTACION_CRITICA', puntaje_implementacion: 42, prioridad_revision: 'CRITICA', nodos_ok: 6, nodos_error: 3, nodos_observar: 1, nodos_pendiente_validar: 2, agendados: 48, meeting_id: '', accion_recomendada: 'Revisar Zoom planificado, cuenta Zoom y recurso visible antes de la siguiente clase.' }
+          ],
+          enRiesgo: [
+            { sigla_curso: '2026 DUO CR MAT03', programa: 'DUO', asignatura: 'Matemática M1', profesor: 'Profesor Juan Pérez', fecha_clase: this.todayISO(), hora_inicio: this.shiftTime(-10), hora_fin: this.shiftTime(70), estado_implementacion: 'IMPLEMENTACION_EN_RIESGO', puntaje_implementacion: 68, prioridad_revision: 'ALTA', nodos_ok: 9, nodos_error: 1, nodos_observar: 2, nodos_pendiente_validar: 1, agendados: 64, meeting_id: '123456789', accion_recomendada: 'Validar agendamiento y evidencia posterior Zoom.' }
+          ],
+          observar: [
+            { sigla_curso: '2026 PGO GL BIO01', programa: 'GO', asignatura: 'Biología', profesor: 'Profesor Base', fecha_clase: this.todayISO(), hora_inicio: this.shiftTime(12), hora_fin: this.shiftTime(92), estado_implementacion: 'IMPLEMENTACION_OBSERVABLE', puntaje_implementacion: 78, prioridad_revision: 'MEDIA', nodos_ok: 10, nodos_error: 0, nodos_observar: 2, nodos_pendiente_validar: 2, agendados: 0, meeting_id: '987654321', accion_recomendada: 'Validar modelo GO satélite y participación observada.' }
+          ],
+          items: []
         };
       },
 
