@@ -2398,7 +2398,8 @@
         bandeja: {},
         timeline: [],
         lecturaOperativa: [],
-        endpointHealth: []
+        endpointHealth: [],
+        moodleProbe: null
       },
       ui: {
         density: 'dense',
@@ -2519,7 +2520,7 @@
     const VisionAPI = {
       jsonp(action, params = {}) {
         if (!VisionConfig.GAS_WEB_APP_URL) {
-          if (VisionConfig.useMockWhenNoUrl) return Promise.resolve(VisionMock.get(action));
+          if (VisionConfig.useMockWhenNoUrl) return Promise.resolve(VisionMock.get(action, params));
           return Promise.reject(new Error('Falta configurar GAS_WEB_APP_URL.'));
         }
 
@@ -2579,6 +2580,10 @@
 
       runMoodleProbe(sigla) {
         return this.jsonp(VisionConfig.endpoints.moodleRun, { sigla });
+      },
+
+      getMoodleSnapshot() {
+        return this.jsonp(VisionConfig.endpoints.moodleSnapshot);
       },
 
       testEndpoint(action) {
@@ -2726,6 +2731,23 @@
           observacion: v.text(r.observacion, ''),
           accion: v.text(r.accion_recomendada, ''),
           raw: r
+        };
+      },
+
+      moodleProbe(raw, siglaFallback = '') {
+        if (!raw) return null;
+        if (raw.ultimoDiagnostico) return raw.ultimoDiagnostico;
+        if (raw.diagnostico) return raw.diagnostico;
+        if (Array.isArray(raw.items) && raw.items.length) return raw.items[0];
+        if (Array.isArray(raw.rows) && raw.rows.length) return raw.rows[0];
+        if (raw.sigla_curso || raw.estado_general || raw.puntaje || raw.prioridad) return raw;
+        return {
+          sigla_curso: siglaFallback || 'Sin sigla',
+          estado_general: raw.ok === false ? 'ERROR' : 'SIN_DETALLE',
+          prioridad: raw.ok === false ? 'ALTA' : 'INFO',
+          puntaje: '',
+          observacion: raw.error || 'El backend respondió, pero no entregó una estructura de diagnóstico Moodle reconocible.',
+          accion_recomendada: 'Revisar contrato de respuesta del endpoint Moodle.'
         };
       },
 
@@ -3160,7 +3182,7 @@
           incidencias: ['Incidencias y bandeja humana', 'Casos operativos priorizados para revisión y trazabilidad.', this.viewIncidencias()],
           telegram: ['Telegram / Comunicaciones', 'Mirror operacional desde LOG_NOTIFICACIONES.', this.viewTelegram()],
           implementacion: ['Salud de implementación', 'Prevalidación de cursos, nodos críticos y acciones recomendadas.', this.viewImplementacion()],
-          moodle: ['Diagnóstico Moodle', 'Diagnóstico dirigido por sigla, nodos, brechas y matriz de comparación.', this.placeholder('Módulo Moodle preparado para visionRunMoodleImplementationProbe.')],
+          moodle: ['Diagnóstico Moodle', 'Diagnóstico dirigido por sigla, nodos, brechas y matriz de comparación.', this.viewMoodle()],
           analitica: ['Analítica consolidada', 'Histórico Visión + Zoom + GO.', this.placeholder('Analítica preparada para visionAnalyticsSnapshotV2.')],
           config: ['Configuración y salud técnica', 'Modo producción, fuentes, triggers y estado del frontend.', this.viewConfig()]
         };
@@ -3319,6 +3341,85 @@
               ${(top.length ? top : items.slice(0, 30)).map(x => VisionComponents.implementationCard(x)).join('') || VisionComponents.empty('No hay datos de salud de implementación disponibles.')}
             </div>
           </section>`;
+      },
+
+      viewMoodle() {
+        const probe = VisionState.normalized.moodleProbe;
+        return `
+          <div class="section-grid">
+            <section class="panel">
+              <div class="panel-header">
+                <div><h2 class="panel-title">Diagnóstico dirigido por sigla</h2><div class="panel-subtitle">Consulta puntual sobre curso, grupo, recursos, restricciones y profesor.</div></div>
+              </div>
+              <div class="panel-body config-grid">
+                <div class="backend-warning">Este módulo no hace auditoría masiva. Ejecuta una revisión puntual sobre una sigla específica para apoyar la gestión de implementación.</div>
+                <div class="config-field">
+                  <label class="config-label" for="moodleSiglaInput">Sigla curso</label>
+                  <input id="moodleSiglaInput" class="config-input" value="${VisionUtils.esc(probe?.sigla_curso || '2026 EET CR LEN01')}" placeholder="Ej: 2026 EET CR LEN01" />
+                </div>
+                <div class="config-actions">
+                  <button class="action-btn primary" onclick="VisionActions.runMoodleProbe()">Ejecutar diagnóstico</button>
+                  <button class="action-btn" onclick="VisionActions.loadMoodleSnapshot()">Cargar último diagnóstico</button>
+                  <button class="action-btn" onclick="VisionActions.setMoodleExample('2026 EET CR LEN01')">Ejemplo LEN01</button>
+                  <button class="action-btn" onclick="VisionActions.setMoodleExample('2026 DUO CR MAT03')">Ejemplo MAT03</button>
+                </div>
+              </div>
+            </section>
+            <section class="panel">
+              <div class="panel-header"><div><h2 class="panel-title">Resultado</h2><div class="panel-subtitle">Estado general, puntaje, prioridad y acción recomendada.</div></div></div>
+              <div class="panel-body">${this.moodleProbeResult(probe)}</div>
+            </section>
+          </div>
+          <section class="panel" style="margin-top:12px;">
+            <div class="panel-header"><div><h2 class="panel-title">Nodos de verificación</h2><div class="panel-subtitle">Confirmaciones, pendientes y brechas detectadas por el diagnóstico.</div></div></div>
+            <div class="panel-body endpoint-grid">${this.moodleProbeNodes(probe)}</div>
+          </section>`;
+      },
+
+      moodleProbeResult(probe) {
+        if (!probe) return VisionComponents.empty('Ejecute un diagnóstico o cargue el último diagnóstico disponible.');
+        const tone = /CRITIC|ERROR|BAJO|NO_ENCONTRADO/i.test((probe.estado_general || '') + ' ' + (probe.prioridad || '')) ? 'danger' : /RIESGO|MEDIA|PENDIENTE|OBSERV/i.test((probe.estado_general || '') + ' ' + (probe.prioridad || '')) ? 'warn' : 'ok';
+        return `
+          <div class="inspector-hero ${tone}">
+            <div class="inspector-hero-title">${VisionUtils.esc(probe.sigla_curso || 'Sin sigla')} · ${VisionUtils.esc(probe.estado_general || 'Sin estado')}</div>
+            <div class="inspector-hero-subtitle">${VisionUtils.esc(probe.observacion || probe.resumen_evidencia || 'Sin observación disponible.')}</div>
+            <div class="class-badges" style="margin-top:10px;">
+              ${VisionComponents.badge('Puntaje ' + (probe.puntaje || '—'), 'info')}
+              ${VisionComponents.badge(probe.prioridad || 'Sin prioridad', tone)}
+            </div>
+          </div>
+          <div class="inspector-action-box" style="margin-top:10px;">
+            <div class="inspector-action-title">Acción recomendada</div>
+            <div class="inspector-action-text">${VisionUtils.esc(probe.accion_recomendada || 'Sin acción recomendada registrada.')}</div>
+          </div>`;
+      },
+
+      moodleProbeNodes(probe) {
+        if (!probe) return VisionComponents.empty('Sin nodos disponibles.');
+        const nodes = this.extractMoodleNodes(probe);
+        if (!nodes.length) return VisionComponents.empty('El diagnóstico no entregó nodos desagregados.');
+        return nodes.map(n => `
+          <div class="endpoint-row">
+            <div class="endpoint-action">${VisionUtils.esc(n.name)}</div>
+            <div>${VisionComponents.badge(n.status || '—', VisionUtils.badgeClass(n.status))}</div>
+            <div class="endpoint-detail">${VisionUtils.esc(n.detail || '')}</div>
+            <div class="endpoint-latency">${VisionUtils.esc(n.weight || '')}</div>
+          </div>`).join('');
+      },
+
+      extractMoodleNodes(probe) {
+        const explicit = [];
+        try {
+          const detail = typeof probe.detalle_json === 'string' ? JSON.parse(probe.detalle_json || '{}') : probe.detalle_json;
+          const nodes = detail?.nodes || detail?.moodle?.nodes || [];
+          if (Array.isArray(nodes)) {
+            nodes.forEach(n => explicit.push({ name: n.name || n.label || n.id || 'Nodo', status: n.status || n.estado || '', detail: n.detail || n.detalle || n.descripcion || '', weight: n.weight || n.peso || '' }));
+          }
+        } catch (err) {}
+        if (explicit.length) return explicit;
+        return Object.entries(probe)
+          .filter(([k]) => /^nodo_/i.test(k))
+          .map(([k, v]) => ({ name: k.replace(/^nodo_/i, '').replace(/_/g, ' '), status: String(v || ''), detail: '' }));
       },
 
       viewConfig() {
@@ -3831,6 +3932,43 @@
         }
       },
 
+      async runMoodleProbe() {
+        const input = document.getElementById('moodleSiglaInput');
+        const sigla = String(input?.value || '').trim();
+        if (!sigla) {
+          alert('Debes ingresar una sigla de curso.');
+          return;
+        }
+        try {
+          VisionState.normalized.moodleProbe = { sigla_curso: sigla, estado_general: 'EJECUTANDO', observacion: 'Consultando diagnóstico Moodle...', prioridad: 'INFO' };
+          VisionViews.render();
+          const raw = await VisionAPI.runMoodleProbe(sigla);
+          VisionState.normalized.moodleProbe = VisionAdapters.moodleProbe(raw, sigla);
+          VisionViews.render();
+        } catch (err) {
+          console.warn('Diagnóstico Moodle usando mock por error:', err);
+          VisionState.normalized.moodleProbe = VisionAdapters.moodleProbe(VisionMock.getMoodleProbe(sigla), sigla);
+          VisionViews.render();
+        }
+      },
+
+      async loadMoodleSnapshot() {
+        try {
+          const raw = await VisionAPI.getMoodleSnapshot();
+          VisionState.normalized.moodleProbe = VisionAdapters.moodleProbe(raw, '');
+          VisionViews.render();
+        } catch (err) {
+          console.warn('Último diagnóstico Moodle usando mock por error:', err);
+          VisionState.normalized.moodleProbe = VisionAdapters.moodleProbe(VisionMock.getMoodleProbe('2026 EET CR LEN01'), '2026 EET CR LEN01');
+          VisionViews.render();
+        }
+      },
+
+      setMoodleExample(sigla) {
+        const input = document.getElementById('moodleSiglaInput');
+        if (input) input.value = sigla;
+      },
+
       copyDoGetRoutes() {
         const text = VisionViews.doGetRoutesSnippet();
         if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -3946,8 +4084,9 @@
      * 10. Mock local para preview sin GAS configurado
      ***********************************************************/
     const VisionMock = {
-      get(action) {
+      get(action, params = {}) {
         if (action === VisionConfig.endpoints.implementation) return this.getImplementation();
+        if (action === VisionConfig.endpoints.moodleRun || action === VisionConfig.endpoints.moodleSnapshot) return this.getMoodleProbe(params.sigla || '2026 EET CR LEN01');
         const now = new Date();
         return {
           ok: true,
@@ -4049,6 +4188,36 @@
             { sigla_curso: '2026 PGO GL BIO01', programa: 'GO', asignatura: 'Biología', profesor: 'Profesor Base', fecha_clase: this.todayISO(), hora_inicio: this.shiftTime(12), hora_fin: this.shiftTime(92), estado_implementacion: 'IMPLEMENTACION_OBSERVABLE', puntaje_implementacion: 78, prioridad_revision: 'MEDIA', nodos_ok: 10, nodos_error: 0, nodos_observar: 2, nodos_pendiente_validar: 2, agendados: 0, meeting_id: '987654321', accion_recomendada: 'Validar modelo GO satélite y participación observada.' }
           ],
           items: []
+        };
+      },
+
+      getMoodleProbe(sigla) {
+        return {
+          ok: true,
+          sigla_curso: sigla || '2026 EET CR LEN01',
+          fecha_clase: this.todayISO(),
+          shortname_moodle_esperado: '2026 EET LEN',
+          course_id: '168',
+          course_fullname: '2026 EET LEN',
+          profile_field_esperado: 'CR',
+          estado_general: 'IMPLEMENTACION_OBSERVABLE',
+          puntaje: 82,
+          prioridad: 'MEDIA',
+          observacion: 'Mock local: diagnóstico Moodle estructurado para validar interfaz.',
+          accion_recomendada: 'Validar restricciones del recurso Zoom y consistencia de grupo/cohorte.',
+          resumen_evidencia: 'Curso Moodle encontrado, grupo detectado y recursos principales parcialmente confirmados.',
+          nodo_cursos: 'OK',
+          nodo_moodle_curso: 'OK',
+          nodo_cohorte: 'FALTA_VALIDAR',
+          nodo_grupo: 'OK',
+          nodo_recurso_asistencia: 'OK',
+          nodo_restricciones_asistencia: 'FALTA_VALIDAR',
+          nodo_recurso_zoom: 'OK',
+          nodo_html_zoom: 'OK',
+          nodo_restricciones_zoom: 'OBSERVAR',
+          nodo_profesor_matriculado: 'FALTA_VALIDAR',
+          nodo_profesor_grupo: 'OK',
+          nodo_regla_perfil_cohorte: 'OBSERVAR'
         };
       },
 
