@@ -2560,10 +2560,11 @@
       },
 
       fmtTime(dateLike) {
-        if (!dateLike) return '';
-        const d = dateLike instanceof Date ? dateLike : new Date(dateLike);
-        if (Number.isNaN(d.getTime())) return String(dateLike);
-        return d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+        return this.normalizeTime(dateLike);
+      },
+
+      fmtDate(dateLike) {
+        return this.normalizeDate(dateLike);
       },
 
       fmtDateTime(dateLike) {
@@ -2571,6 +2572,56 @@
         const d = dateLike instanceof Date ? dateLike : new Date(dateLike);
         if (Number.isNaN(d.getTime())) return String(dateLike);
         return d.toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'medium' });
+      },
+
+      normalizeTime(value) {
+        if (value === null || value === undefined || value === '') return '';
+        if (value instanceof Date && !Number.isNaN(value.getTime())) {
+          return value.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        const raw = String(value).trim();
+        if (!raw) return '';
+
+        // Google Sheets suele entregar horas como fecha base 1899-12-30T12:45:00.000Z.
+        // Para horarios, se extrae directamente HH:mm del string para evitar desfases por zona horaria.
+        let m = raw.match(/T(\d{1,2}:\d{2})(?::\d{2})?/);
+        if (m) return m[1].padStart(5, '0');
+
+        m = raw.match(/(?:^|\s)(\d{1,2}):(\d{2})(?::\d{2})?/);
+        if (m) return `${String(+m[1]).padStart(2, '0')}:${m[2]}`;
+
+        // Fracción de día de Google Sheets/Excel: 0.5 = 12:00.
+        const n = Number(raw.replace(',', '.'));
+        if (Number.isFinite(n) && n >= 0 && n < 1) {
+          const total = Math.round(n * 24 * 60);
+          const hh = Math.floor(total / 60) % 24;
+          const mm = total % 60;
+          return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+        }
+
+        return raw;
+      },
+
+      normalizeDate(value) {
+        if (value === null || value === undefined || value === '') return '';
+        if (value instanceof Date && !Number.isNaN(value.getTime())) {
+          return value.toLocaleDateString('es-CL');
+        }
+
+        const raw = String(value).trim();
+        if (!raw) return '';
+
+        // Fecha ISO: se usa la parte YYYY-MM-DD sin reinterpretar zona horaria.
+        let m = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+
+        m = raw.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+        if (m) return `${m[1].padStart(2, '0')}/${m[2].padStart(2, '0')}/${m[3]}`;
+
+        const d = new Date(raw);
+        if (!Number.isNaN(d.getTime())) return d.toLocaleDateString('es-CL');
+        return raw;
       },
 
       classSeverityClass(item) {
@@ -2602,37 +2653,52 @@
       },
 
       estimateProgress(c) {
-        if (typeof c.avancePct === 'number') return Math.max(0, Math.min(100, c.avancePct));
-
+        const estado = String(c.estado || c.estadoCalculado || c.estado_calculado || '').toUpperCase();
         const now = new Date();
-        const fecha = c.fecha || c.fechaClase;
-        const start = this.buildDateWithTime(fecha, c.horaInicio || c.inicio);
-        const end = this.buildDateWithTime(fecha, c.horaFin || c.fin);
-        if (!start || !end || end <= start) return 0;
-        if (now <= start) return 0;
-        if (now >= end) return 100;
-        return Math.round(((now - start) / (end - start)) * 100);
+        const fecha = c.fechaRaw || c.fecha || c.fechaClase;
+        const start = this.buildDateWithTime(fecha, c.horaInicioRaw || c.horaInicio || c.inicio);
+        const end = this.buildDateWithTime(fecha, c.horaFinRaw || c.horaFin || c.fin);
+
+        // La barra representa avance temporal. Si el backend trae 0, pero hay horario,
+        // se recalcula para evitar una clase en curso/finalizada con barra muerta.
+        if (start && end && end > start) {
+          if (now <= start) return 0;
+          if (now >= end || estado.includes('FINALIZADA')) return 100;
+          return Math.round(((now - start) / (end - start)) * 100);
+        }
+
+        if (estado.includes('FINALIZADA')) return 100;
+        if (typeof c.avancePct === 'number') return Math.max(0, Math.min(100, c.avancePct));
+        return 0;
       },
 
       buildDateWithTime(fecha, hora) {
         if (!fecha || !hora) return null;
-        const f = String(fecha).includes('T') ? new Date(fecha) : null;
         let yyyy, mm, dd;
-        if (f && !Number.isNaN(f.getTime())) {
-          yyyy = f.getFullYear(); mm = f.getMonth(); dd = f.getDate();
-        } else {
-          const s = String(fecha);
-          let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-          if (m) { yyyy = +m[1]; mm = +m[2] - 1; dd = +m[3]; }
+        const rawFecha = String(fecha).trim();
+        let m = rawFecha.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (m) { yyyy = +m[1]; mm = +m[2] - 1; dd = +m[3]; }
+        else {
+          m = rawFecha.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+          if (m) { yyyy = +m[3]; mm = +m[2] - 1; dd = +m[1]; }
           else {
-            m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-            if (!m) return null;
-            yyyy = +m[3]; mm = +m[2] - 1; dd = +m[1];
+            const f = new Date(rawFecha);
+            if (Number.isNaN(f.getTime())) return null;
+            yyyy = f.getFullYear(); mm = f.getMonth(); dd = f.getDate();
           }
         }
-        const hm = String(hora).match(/(\d{1,2}):(\d{2})/);
+        const normalized = this.normalizeTime(hora);
+        const hm = String(normalized).match(/(\d{1,2}):(\d{2})/);
         if (!hm) return null;
         return new Date(yyyy, mm, dd, +hm[1], +hm[2], 0, 0);
+      },
+
+      classTimingLabel(c) {
+        const estado = String(c.estado || '').toUpperCase();
+        if (estado.includes('FINALIZADA') && c.zoomActivo) return 'Horario finalizado · sala activa';
+        if (estado.includes('FINALIZADA')) return 'Horario finalizado';
+        if (c.zoomActivo) return 'Sala activa detectada';
+        return 'Sin sala activa detectada';
       }
     };
 
@@ -2934,22 +3000,39 @@
           (/NO_INICIADA/i.test(estadoDerivado) ? 'CRITICA' :
             /BAJA_ASISTENCIA/i.test(estadoDerivado) ? 'ALTA' : 'INFO');
 
+        const fechaRaw = c.fecha || c.fecha_clase || c.fechaClase || '';
+        const horaInicioRaw = c.horaInicio || c.inicio || c.hora_programada || c.hora_inicio || '';
+        const horaFinRaw = c.horaFin || c.fin || c.hora_fin || '';
+        const zoomActivo = Boolean(c.zoomActivo ?? c.zoom_activo ?? c.live);
+        const avancePct = v.estimateProgress({
+          ...c,
+          estado: estadoDerivado,
+          fechaRaw,
+          horaInicioRaw,
+          horaFinRaw,
+          zoomActivo
+        });
+
         const out = {
           id: v.text(c.id || c.sigla || c.sigla_curso, 'clase-' + index),
           sigla: v.text(c.sigla || c.sigla_curso || c.curso, 'Sin sigla'),
           programa: v.text(c.programa, ''),
           asignatura: v.text(c.asignatura || c.nombre_asignatura, 'Clase monitoreada desde EVENTOS_CLASE'),
           profesor: v.text(c.profesor || c.docente || c.profesor_rankeado, 'Profesor/a no informado'),
-          fecha: v.text(c.fecha || c.fecha_clase, ''),
-          horaInicio: v.text(c.horaInicio || c.inicio || c.hora_programada || c.hora_inicio, ''),
-          horaFin: v.text(c.horaFin || c.fin || c.hora_fin, ''),
+          fecha: v.normalizeDate(fechaRaw),
+          fechaRaw,
+          horaInicio: v.normalizeTime(horaInicioRaw),
+          horaFin: v.normalizeTime(horaFinRaw),
+          horaInicioRaw,
+          horaFinRaw,
           estado: v.text(estadoDerivado, 'SIN_ESTADO'),
           severidad: v.text(severidadDerivada, ''),
-          zoomActivo: Boolean(c.zoomActivo ?? c.zoom_activo ?? c.live),
+          zoomActivo,
           participantes,
           agendados,
           asistenciaPct,
-          avancePct: v.estimateProgress({ ...c, horaInicio: c.horaInicio || c.inicio || c.hora_programada || c.hora_inicio, horaFin: c.horaFin || c.fin || c.hora_fin }),
+          avancePct,
+          estadoZoomTexto: v.classTimingLabel({ estado: estadoDerivado, zoomActivo }),
           accionSugerida: v.text(c.accionSugerida || c.accion_sugerida || c.accion, ''),
           observacion: v.text(c.observacion || c.detalle || c.evaluacion || (c.eventos ? 'Clase agregada desde ' + c.eventos + ' eventos de EVENTOS_CLASE.' : ''), ''),
           meetingId: v.text(c.meetingId || c.meeting_id, ''),
@@ -3082,7 +3165,7 @@
             </div>
             <div class="class-meta">
               <div class="class-meta-card"><small>Profesor/a</small><strong>${VisionUtils.esc(c.profesor)}</strong></div>
-              <div class="class-meta-card"><small>Estado Zoom</small><strong>${VisionUtils.esc(c.zoomActivo ? 'Sala activa detectada' : 'Sin sala activa detectada')}</strong></div>
+              <div class="class-meta-card"><small>Estado Zoom</small><strong>${VisionUtils.esc(c.estadoZoomTexto || (c.zoomActivo ? 'Sala activa detectada' : 'Sin sala activa detectada'))}</strong></div>
               <div class="class-meta-card"><small>Meeting ID</small><strong>${VisionUtils.esc(c.meetingId || 'No informado')}</strong></div>
               <div class="class-meta-card"><small>Fecha</small><strong>${VisionUtils.esc(c.fecha || 'No informada')}</strong></div>
             </div>
@@ -3091,7 +3174,7 @@
               <div class="class-action-text">${VisionUtils.esc(VisionUtils.short(accion, 230))}</div>
             </div>
             <div class="progress-block">
-              <div class="progress-label"><span>Avance de clase</span><b>${avance}%</b></div>
+              <div class="progress-label"><span>Avance temporal de clase</span><b>${avance}%</b></div>
               <div class="progress-track"><div class="progress-fill" style="width:${avance}%"></div></div>
             </div>
           </article>`;
