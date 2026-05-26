@@ -2288,6 +2288,127 @@
       font-size: 15px;
     }
 
+
+
+    /* =========================================================
+       Moodle phase-check board
+       Visión revisa cada fase como checklist operativo
+       ========================================================= */
+    .moodle-phase-board {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .moodle-phase-card {
+      border: 1px solid rgba(120,150,180,.16);
+      border-left: 5px solid var(--blue);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(180deg, #fff, #fbfdff);
+      box-shadow: var(--shadow-soft);
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .moodle-phase-card.ok { border-left-color: var(--green); }
+    .moodle-phase-card.warn { border-left-color: var(--orange); }
+    .moodle-phase-card.danger { border-left-color: var(--red); }
+    .moodle-phase-card.info { border-left-color: var(--blue); }
+
+    .moodle-phase-head {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .moodle-phase-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-md);
+      display: grid;
+      place-items: center;
+      background: rgba(29,125,242,.10);
+      color: #0b4fa4;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .moodle-phase-card.ok .moodle-phase-icon { background: rgba(31,157,99,.12); color: #11643c; }
+    .moodle-phase-card.warn .moodle-phase-icon { background: rgba(249,115,22,.12); color: #a94700; }
+    .moodle-phase-card.danger .moodle-phase-icon { background: rgba(217,45,32,.12); color: #b42318; }
+
+    .moodle-phase-title {
+      color: #0b1f3a;
+      font-size: 12px;
+      line-height: 1.18;
+      font-weight: 650;
+      letter-spacing: -.01em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .moodle-phase-subtitle {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.25;
+    }
+
+    .moodle-phase-items {
+      display: grid;
+      gap: 5px;
+    }
+
+    .moodle-phase-item {
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr) auto;
+      gap: 6px;
+      align-items: center;
+      padding: 5px 6px;
+      border: 1px solid rgba(120,150,180,.13);
+      border-radius: var(--radius-md);
+      background: rgba(246,250,255,.70);
+      font-size: 10.8px;
+      line-height: 1.2;
+    }
+
+    .moodle-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      background: rgba(100,116,139,.10);
+      color: #64748b;
+    }
+
+    .moodle-check.ok { background: rgba(31,157,99,.14); color: #11643c; }
+    .moodle-check.warn { background: rgba(249,115,22,.14); color: #a94700; }
+    .moodle-check.danger { background: rgba(217,45,32,.14); color: #b42318; }
+    .moodle-check.info { background: rgba(29,125,242,.12); color: #0b4fa4; }
+
+    .moodle-phase-label {
+      color: #334155;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .moodle-phase-status {
+      color: var(--muted);
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: .035em;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
     /* =========================================================
        Responsive
        ========================================================= */
@@ -2319,6 +2440,7 @@
       .case-flow { grid-template-columns: 1fr 1fr; }
       .comm-board { grid-template-columns: 1fr; }
       .telegram-flow { grid-template-columns: 1fr; }
+      .moodle-phase-board { grid-template-columns: 1fr; }
       .class-card { grid-template-columns: 1fr; grid-template-areas: "head" "donut" "meta" "action" "progress"; }
       .donut-box { justify-items: start; }
       .class-meta { grid-template-columns: 1fr; }
@@ -3371,6 +3493,10 @@
             </section>
           </div>
           <section class="panel" style="margin-top:12px;">
+            <div class="panel-header"><div><h2 class="panel-title">Visión revisa cada fase</h2><div class="panel-subtitle">Checklist operacional por etapa: fuente, Moodle, matrícula, recursos, restricciones y docencia.</div></div></div>
+            <div class="panel-body">${this.moodlePhaseBoard(probe)}</div>
+          </section>
+          <section class="panel" style="margin-top:12px;">
             <div class="panel-header"><div><h2 class="panel-title">Nodos de verificación</h2><div class="panel-subtitle">Confirmaciones, pendientes y brechas detectadas por el diagnóstico.</div></div></div>
             <div class="panel-body endpoint-grid">${this.moodleProbeNodes(probe)}</div>
           </section>`;
@@ -3405,6 +3531,112 @@
             <div class="endpoint-detail">${VisionUtils.esc(n.detail || '')}</div>
             <div class="endpoint-latency">${VisionUtils.esc(n.weight || '')}</div>
           </div>`).join('');
+      },
+      moodlePhaseBoard(probe) {
+        if (!probe) return VisionComponents.empty('Ejecute un diagnóstico para ver a Visión revisando cada fase.');
+        const phases = this.moodlePhases(probe);
+        return `<div class="moodle-phase-board">${phases.map(phase => this.moodlePhaseCard(phase)).join('')}</div>`;
+      },
+
+      moodlePhaseCard(phase) {
+        const tone = this.moodlePhaseTone(phase.items.map(x => x.status).join(' '));
+        const icon = tone === 'ok' ? '✓' : tone === 'danger' ? '!' : tone === 'warn' ? '◷' : '•';
+        return `
+          <article class="moodle-phase-card ${tone}">
+            <div class="moodle-phase-head">
+              <div class="moodle-phase-icon">${icon}</div>
+              <div>
+                <div class="moodle-phase-title">${VisionUtils.esc(phase.title)}</div>
+                <div class="moodle-phase-subtitle">${VisionUtils.esc(phase.subtitle)}</div>
+              </div>
+            </div>
+            <div class="moodle-phase-items">
+              ${phase.items.map(item => this.moodlePhaseItem(item)).join('')}
+            </div>
+          </article>`;
+      },
+
+      moodlePhaseItem(item) {
+        const tone = this.moodlePhaseTone(item.status);
+        const icon = tone === 'ok' ? '✓' : tone === 'danger' ? '!' : tone === 'warn' ? '◷' : '•';
+        return `
+          <div class="moodle-phase-item">
+            <span class="moodle-check ${tone}">${icon}</span>
+            <span class="moodle-phase-label">${VisionUtils.esc(item.label)}</span>
+            <span class="moodle-phase-status">${VisionUtils.esc(item.status || '—')}</span>
+          </div>`;
+      },
+
+      moodlePhaseTone(status) {
+        const raw = String(status || '').toUpperCase();
+        if (/ERROR|NO_ENCONTRADO|FALTA|CRITIC|BAJO/.test(raw)) return 'danger';
+        if (/OBSERV|PENDIENTE|VALIDAR|RIESGO|MEDIA/.test(raw)) return 'warn';
+        if (/OK|CONFIRMADO|ENCONTRADO|CORRECTO/.test(raw)) return 'ok';
+        return 'info';
+      },
+
+      moodlePhases(probe) {
+        const node = (key, label) => ({ label, status: this.moodleNodeStatus(probe, key) });
+        return [
+          {
+            title: 'Fase 1 · Fuente operativa',
+            subtitle: 'Visión cruza la sigla con CURSOS.',
+            items: [
+              node('nodo_cursos', 'Curso existe en CURSOS'),
+              node('nodo_regla_perfil_cohorte', 'Regla perfil/cohorte'),
+              { label: 'Sigla diagnosticada', status: probe.sigla_curso ? 'OK' : 'FALTA_VALIDAR' }
+            ]
+          },
+          {
+            title: 'Fase 2 · Curso Moodle',
+            subtitle: 'Visión valida el curso esperado.',
+            items: [
+              node('nodo_moodle_curso', 'Curso Moodle'),
+              { label: 'Shortname esperado', status: probe.shortname_moodle_esperado || probe.course_fullname ? 'OK' : 'FALTA_VALIDAR' },
+              { label: 'Course ID', status: probe.course_id ? 'OK' : 'FALTA_VALIDAR' }
+            ]
+          },
+          {
+            title: 'Fase 3 · Cohorte y grupo',
+            subtitle: 'Visión revisa sincronización académica.',
+            items: [
+              node('nodo_cohorte', 'Cohorte'),
+              node('nodo_grupo', 'Grupo'),
+              { label: 'Campo perfil esperado', status: probe.profile_field_esperado ? 'OK' : 'FALTA_VALIDAR' }
+            ]
+          },
+          {
+            title: 'Fase 4 · Recursos visibles',
+            subtitle: 'Visión inspecciona asistencia y Zoom.',
+            items: [
+              node('nodo_recurso_asistencia', 'Recurso asistencia'),
+              node('nodo_recurso_zoom', 'Recurso Zoom'),
+              node('nodo_html_zoom', 'HTML / iframe Zoom')
+            ]
+          },
+          {
+            title: 'Fase 5 · Restricciones',
+            subtitle: 'Visión revisa reglas de acceso.',
+            items: [
+              node('nodo_restricciones_asistencia', 'Restricción asistencia'),
+              node('nodo_restricciones_zoom', 'Restricción Zoom'),
+              node('nodo_regla_perfil_cohorte', 'Regla por perfil/cohorte')
+            ]
+          },
+          {
+            title: 'Fase 6 · Docencia',
+            subtitle: 'Visión valida profesor y grupo.',
+            items: [
+              node('nodo_profesor_matriculado', 'Profesor matriculado'),
+              node('nodo_profesor_grupo', 'Profesor en grupo'),
+              { label: 'Acción recomendada', status: probe.accion_recomendada ? 'OK' : 'FALTA_VALIDAR' }
+            ]
+          }
+        ];
+      },
+
+      moodleNodeStatus(probe, key) {
+        return probe?.[key] || 'FALTA_VALIDAR';
       },
 
       extractMoodleNodes(probe) {
