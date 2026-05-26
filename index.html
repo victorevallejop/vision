@@ -2508,7 +2508,52 @@
           timeline,
           lecturaOperativa: Array.isArray(raw?.lecturaOperativa)
             ? raw.lecturaOperativa
-            : [v.text(raw?.estado?.detalle, 'Visión mantiene lectura operativa activa.')]
+            : [v.text(raw?.estado?.detalle, 'Visión mantiene lectura operativa activa.')],
+          saludImplementacion: VisionState.normalized.saludImplementacion || null
+        };
+      },
+
+      implementation(raw) {
+        const v = VisionUtils;
+        const items = Array.isArray(raw?.items) ? raw.items : [];
+        return {
+          sistema: raw?.sistema || {},
+          resumen: raw?.resumen || {},
+          criticos: Array.isArray(raw?.criticos) ? raw.criticos.map((x, i) => this.implementationItem(x, i)) : [],
+          enRiesgo: Array.isArray(raw?.enRiesgo) ? raw.enRiesgo.map((x, i) => this.implementationItem(x, i)) : [],
+          observar: Array.isArray(raw?.observar) ? raw.observar.map((x, i) => this.implementationItem(x, i)) : [],
+          items: items.map((x, i) => this.implementationItem(x, i))
+        };
+      },
+
+      implementationItem(r, index) {
+        const v = VisionUtils;
+        return {
+          id: v.text(r.sigla_curso || r.sigla || 'impl-' + index),
+          sigla: v.text(r.sigla_curso || r.sigla, 'Sin sigla'),
+          programa: v.text(r.programa, ''),
+          asignatura: v.text(r.asignatura, ''),
+          profesor: v.text(r.profesor, ''),
+          fecha: v.text(r.fecha_clase, ''),
+          horario: [v.text(r.hora_inicio, ''), v.text(r.hora_fin, '')].filter(Boolean).join(' - '),
+          estado: v.text(r.estado_implementacion, 'SIN_ESTADO'),
+          puntaje: v.num(r.puntaje_implementacion, 0),
+          confianza: v.text(r.nivel_confianza, ''),
+          prioridad: v.text(r.prioridad_revision, ''),
+          nodosOk: v.num(r.nodos_ok, 0),
+          nodosObservar: v.num(r.nodos_observar, 0),
+          nodosError: v.num(r.nodos_error, 0),
+          nodosPendiente: v.num(r.nodos_pendiente_validar, 0),
+          nodosNoAplica: v.num(r.nodos_no_aplica, 0),
+          estadoCurso: v.text(r.estado_curso, ''),
+          agendados: v.num(r.agendados, 0),
+          meetingId: v.text(r.meeting_id, ''),
+          evidenciaZoom: v.text(r.evidencia_zoom, ''),
+          estadoZoomAuditado: v.text(r.estado_zoom_auditado, ''),
+          estadoModeloGo: v.text(r.estado_modelo_go, ''),
+          observacion: v.text(r.observacion, ''),
+          accion: v.text(r.accion_recomendada, ''),
+          raw: r
         };
       },
 
@@ -2756,6 +2801,30 @@
           </article>`;
       },
 
+      implementationCard(x) {
+        const tone = /CRITICA|ERROR/i.test(x.estado + ' ' + x.prioridad) ? 'danger' : /RIESGO|ALTA|OBSERV/i.test(x.estado + ' ' + x.prioridad) ? 'warn' : 'info';
+        return `
+          <article class="case-card ${tone}" onclick="VisionActions.selectItem('implementation','${VisionUtils.esc(x.id)}')">
+            <div class="case-head">
+              <div>
+                <h3 class="case-title">${VisionUtils.esc(x.sigla)} · ${VisionUtils.esc(x.estado)}</h3>
+                <div class="case-subtitle">${VisionUtils.esc(x.asignatura || 'Asignatura no informada')} · ${VisionUtils.esc(x.profesor || 'Profesor/a no informado')}</div>
+              </div>
+              <div>${this.badge(x.prioridad || x.estado, tone)}</div>
+            </div>
+            <div class="case-flow">
+              <div class="case-node"><small>Puntaje</small><strong>${VisionUtils.esc(x.puntaje)}</strong></div>
+              <div class="case-node"><small>Nodos OK</small><strong>${VisionUtils.esc(x.nodosOk)}</strong></div>
+              <div class="case-node"><small>Errores</small><strong>${VisionUtils.esc(x.nodosError)}</strong></div>
+              <div class="case-node"><small>Pendiente validar</small><strong>${VisionUtils.esc(x.nodosPendiente)}</strong></div>
+            </div>
+            <div class="case-action-box">
+              <div class="case-action-title">Acción recomendada / observación</div>
+              <div class="case-action-text">${VisionUtils.esc(VisionUtils.short(x.accion || x.observacion || 'Sin acción recomendada registrada.', 240))}</div>
+            </div>
+          </article>`;
+      },
+
       empty(text) {
         return `<div class="empty-state">${VisionUtils.esc(text)}</div>`;
       }
@@ -2917,7 +2986,7 @@
           operacion: ['Operación en vivo', 'Clases, avance temporal, Zoom, participantes, agendados y timeline operativo.', this.viewOperacion()],
           incidencias: ['Incidencias y bandeja humana', 'Casos operativos priorizados para revisión y trazabilidad.', this.viewIncidencias()],
           telegram: ['Telegram / Comunicaciones', 'Mirror operacional desde LOG_NOTIFICACIONES.', this.viewTelegram()],
-          implementacion: ['Salud de implementación', 'Prevalidación de cursos, nodos críticos y acciones recomendadas.', this.placeholder('Salud de implementación quedará conectada al endpoint visionImplementationHealthSnapshot.')],
+          implementacion: ['Salud de implementación', 'Prevalidación de cursos, nodos críticos y acciones recomendadas.', this.viewImplementacion()],
           moodle: ['Diagnóstico Moodle', 'Diagnóstico dirigido por sigla, nodos, brechas y matriz de comparación.', this.placeholder('Módulo Moodle preparado para visionRunMoodleImplementationProbe.')],
           analitica: ['Analítica consolidada', 'Histórico Visión + Zoom + GO.', this.placeholder('Analítica preparada para visionAnalyticsSnapshotV2.')],
           config: ['Configuración y salud técnica', 'Modo producción, fuentes, triggers y estado del frontend.', this.viewConfig()]
@@ -3047,6 +3116,38 @@
           </section>`;
       },
 
+      viewImplementacion() {
+        const data = VisionState.normalized.saludImplementacion;
+        if (!data) {
+          setTimeout(() => VisionApp.loadImplementationHealth(), 0);
+          return this.placeholder('Cargando Salud de Implementación desde visionImplementationHealthSnapshot...');
+        }
+
+        const items = data.items || [];
+        const criticos = data.criticos?.length || items.filter(x => /CRITICA/i.test(x.estado)).length;
+        const riesgo = data.enRiesgo?.length || items.filter(x => /RIESGO/i.test(x.estado)).length;
+        const observar = data.observar?.length || items.filter(x => /OBSERVABLE|OBSERVAR/i.test(x.estado)).length;
+        const ok = items.filter(x => /OK|SALUDABLE|IMPLEMENTACION_OK/i.test(x.estado)).length;
+        const top = [...(data.criticos || []), ...(data.enRiesgo || []), ...(data.observar || [])].slice(0, 20);
+
+        return `
+          <div class="incident-board">
+            <div class="incident-board-card"><div class="incident-board-label">Críticos</div><div class="incident-board-value">${VisionUtils.esc(criticos)}</div></div>
+            <div class="incident-board-card"><div class="incident-board-label">En riesgo</div><div class="incident-board-value">${VisionUtils.esc(riesgo)}</div></div>
+            <div class="incident-board-card"><div class="incident-board-label">Observables</div><div class="incident-board-value">${VisionUtils.esc(observar)}</div></div>
+            <div class="incident-board-card"><div class="incident-board-label">Total evaluado</div><div class="incident-board-value">${VisionUtils.esc(items.length)}</div></div>
+          </div>
+          <section class="panel">
+            <div class="panel-header">
+              <div><h2 class="panel-title">Prevalidación de implementación</h2><div class="panel-subtitle">Cursos priorizados según brechas preventivas, nodos de salud y acción recomendada.</div></div>
+              ${VisionComponents.badge(`${top.length || items.length} visibles`, 'info')}
+            </div>
+            <div class="panel-body incident-list">
+              ${(top.length ? top : items.slice(0, 30)).map(x => VisionComponents.implementationCard(x)).join('') || VisionComponents.empty('No hay datos de salud de implementación disponibles.')}
+            </div>
+          </section>`;
+      },
+
       viewConfig() {
         const s = VisionState.normalized.sistema;
         const e = VisionState.normalized.estado;
@@ -3154,6 +3255,7 @@
         if (type === 'class') return item.sigla || 'Clase';
         if (type === 'incident') return item.id || 'Incidencia';
         if (type === 'telegram') return item.tipo || 'Telegram';
+        if (type === 'implementation') return item.sigla || 'Implementación';
         return 'Detalle';
       },
 
@@ -3161,6 +3263,7 @@
         if (type === 'class') return this.classInspector(item);
         if (type === 'incident') return this.incidentInspector(item);
         if (type === 'telegram') return this.telegramInspector(item);
+        if (type === 'implementation') return this.implementationInspector(item);
         return Object.entries(item).map(([k, v]) => this.detailRow(k, typeof v === 'object' ? JSON.stringify(v) : v)).join('');
       },
 
@@ -3259,6 +3362,42 @@
           </div>`;
       },
 
+      implementationInspector(x) {
+        const tone = /CRITICA|ERROR/i.test(x.estado + ' ' + x.prioridad) ? 'danger' : /RIESGO|ALTA|OBSERV/i.test(x.estado + ' ' + x.prioridad) ? 'warn' : 'info';
+        return `
+          <div class="inspector-hero ${tone}">
+            <div class="inspector-hero-title">${VisionUtils.esc(x.sigla)}</div>
+            <div class="inspector-hero-subtitle">${VisionUtils.esc(x.estado)} · ${VisionUtils.esc(x.asignatura || 'Asignatura no informada')}</div>
+            <div class="class-badges" style="margin-top:10px;">${VisionComponents.badge(x.prioridad || 'REVISIÓN', tone)}${VisionComponents.badge('Puntaje ' + x.puntaje, 'info')}</div>
+          </div>
+          <section class="inspector-section">
+            <div class="inspector-section-head"><div class="inspector-section-title">Nodos de implementación</div></div>
+            <div class="inspector-section-body">
+              <div class="inspector-mini-grid">
+                ${this.inspectorMini('OK', x.nodosOk)}
+                ${this.inspectorMini('Observar', x.nodosObservar)}
+                ${this.inspectorMini('Error', x.nodosError)}
+                ${this.inspectorMini('Pendiente', x.nodosPendiente)}
+              </div>
+            </div>
+          </section>
+          <section class="inspector-section">
+            <div class="inspector-section-head"><div class="inspector-section-title">Contexto operativo</div></div>
+            <div class="inspector-section-body">
+              <div class="inspector-mini-grid">
+                ${this.inspectorMini('Profesor/a', x.profesor || 'No informado')}
+                ${this.inspectorMini('Horario', x.horario || 'No informado')}
+                ${this.inspectorMini('Agendados', x.agendados)}
+                ${this.inspectorMini('Meeting ID', x.meetingId || 'No informado')}
+              </div>
+            </div>
+          </section>
+          <div class="inspector-action-box">
+            <div class="inspector-action-title">Acción recomendada / observación</div>
+            <div class="inspector-action-text">${VisionUtils.esc(x.accion || x.observacion || 'Sin acción recomendada registrada.')}</div>
+          </div>`;
+      },
+
       inspectorMini(label, value) {
         return `<div class="inspector-mini"><small>${VisionUtils.esc(label)}</small><strong>${VisionUtils.esc(value || '—')}</strong></div>`;
       },
@@ -3296,7 +3435,8 @@
         const sources = {
           class: VisionState.normalized.clases,
           incident: VisionState.normalized.incidencias,
-          telegram: VisionState.normalized.telegram
+          telegram: VisionState.normalized.telegram,
+          implementation: VisionState.normalized.saludImplementacion?.items || []
         };
         VisionState.selectedItemType = type;
         VisionState.selectedItem = (sources[type] || []).find(x => x.id === id) || null;
@@ -3370,6 +3510,19 @@
           alert('No se pudo cargar Visión: ' + err.message);
         } finally {
           VisionState.loading = false;
+        }
+      },
+
+      async loadImplementationHealth() {
+        try {
+          const raw = await VisionAPI.getImplementationHealth();
+          VisionState.snapshots.implementation = raw;
+          VisionState.normalized.saludImplementacion = VisionAdapters.implementation(raw);
+          VisionViews.render();
+        } catch (err) {
+          console.warn('No se pudo cargar Salud de Implementación:', err);
+          VisionState.normalized.saludImplementacion = VisionAdapters.implementation(VisionMock.getImplementation());
+          VisionViews.render();
         }
       },
 
