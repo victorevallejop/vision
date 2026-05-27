@@ -2409,6 +2409,43 @@
       white-space: nowrap;
     }
 
+
+
+    /* =========================================================
+       Sprint 1_s · Robot Visión desde assets
+       Sustituye el robot dibujado en CSS por la imagen oficial.
+       ========================================================= */
+    .assistant-avatar,
+    .readout-avatar,
+    .loader-bot {
+      background-color: #0b4fa4;
+      background-image:
+        url("assets/vision-bot.png"),
+        linear-gradient(135deg, #0b4fa4, #54b6ff);
+      background-repeat: no-repeat, no-repeat;
+      background-position: center, center;
+      background-size: 82% auto, cover;
+      overflow: hidden;
+    }
+
+    .readout-avatar {
+      background-size: 78% auto, cover;
+    }
+
+    .loader-bot {
+      background-size: 76% auto, cover;
+    }
+
+    .assistant-avatar::before,
+    .assistant-avatar::after,
+    .readout-avatar::before,
+    .readout-avatar::after,
+    .loader-bot::before,
+    .loader-bot::after {
+      content: none !important;
+      display: none !important;
+    }
+
     /* =========================================================
        Responsive
        ========================================================= */
