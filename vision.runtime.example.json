@@ -1,0 +1,8 @@
+{
+  "environment": "production",
+  "backendUrl": "https://script.google.com/macros/s/AKfycbXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX/exec",
+  "defaultDataSource": "real",
+  "mockAllowed": false,
+  "safeViewDefault": true,
+  "frontendVersion": "2.1B0"
+}

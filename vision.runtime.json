@@ -1,0 +1,9 @@
+{
+  "environment": "production",
+  "backendUrl": "REEMPLAZAR_POR_URL_WEB_APP_PRODUCTIVA_DE_GOOGLE_APPS_SCRIPT",
+  "defaultDataSource": "real",
+  "mockAllowed": false,
+  "safeViewDefault": true,
+  "frontendVersion": "2.1B0",
+  "description": "Configuración runtime de Visión. Este archivo debe vivir junto al index.html en GitHub Pages. Reemplace backendUrl por la URL /exec publicada del Web App productivo."
+}
