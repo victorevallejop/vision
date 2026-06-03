@@ -2753,15 +2753,22 @@
      * 1. Configuración
      ***********************************************************/
     const VisionConfig = {
-      // Puede quedar hardcodeada aquí o cargarse desde Configuración en la interfaz.
-      // Ejemplo: https://script.google.com/macros/s/AKfycb.../exec
-      GAS_WEB_APP_URL: localStorage.getItem('VISION_GAS_WEB_APP_URL') || '',
+      // V2.1B0: el backend productivo se resuelve en tiempo de ejecución desde vision.runtime.json.
+      // No depende de la pestaña Configuración ni queda escrito en la matriz principal del frontend.
+      GAS_WEB_APP_URL: '',
+      runtimeConfigUrl: 'vision.runtime.json',
+      runtimeConfig: null,
+      runtimeLoaded: false,
+      runtimeError: '',
+      dataSourceMode: 'PENDIENTE_RUNTIME',
+      explicitDemoMode: false,
 
       refreshSeconds: 180,
-      useMockWhenNoUrl: true,
+      useMockWhenNoUrl: false,
       allowRuntimeBackendConfig: true,
+      allowLocalBackendOverride: true,
       defaultTab: 'operacion',
-      version: 'vNext Sprint 1.s · Presentación',
+      version: 'vNext Sprint 2.1B0 · Backend runtime',
 
       endpoints: {
         live: 'visionLiveOperationsSnapshot',
@@ -2988,13 +2995,85 @@
     };
 
     /***********************************************************
-     * 4. Cliente API JSONP
+     * 4. Configuración runtime del backend productivo
+     ***********************************************************/
+    const VisionRuntime = {
+      async load() {
+        const query = new URLSearchParams(window.location.search || '');
+        const demoParam = String(query.get('demo') || '').trim();
+        const forceDemo = demoParam === '1' || demoParam.toLowerCase() === 'true';
+
+        if (forceDemo) {
+          VisionConfig.explicitDemoMode = true;
+          VisionConfig.useMockWhenNoUrl = true;
+          VisionConfig.dataSourceMode = 'MOCK_EXPLICITO';
+          VisionConfig.runtimeLoaded = true;
+          VisionConfig.runtimeConfig = { environment: 'demo', mockAllowed: true };
+          return;
+        }
+
+        const runtimeUrl = String(query.get('runtime') || VisionConfig.runtimeConfigUrl || 'vision.runtime.json').trim();
+        const localOverrideRequested = query.get('override') === '1';
+
+        try {
+          const separator = runtimeUrl.includes('?') ? '&' : '?';
+          const response = await fetch(runtimeUrl + separator + '_ts=' + Date.now(), { cache: 'no-store' });
+          if (!response.ok) {
+            throw new Error('No se pudo leer configuración runtime HTTP ' + response.status);
+          }
+
+          const cfg = await response.json();
+          const backendUrl = this.normalizeBackendUrl(
+            cfg.backendUrl || cfg.backend_url || cfg.gasWebAppUrl || cfg.GAS_WEB_APP_URL || ''
+          );
+
+          if (!backendUrl) {
+            throw new Error('vision.runtime.json no contiene backendUrl válido.');
+          }
+
+          VisionConfig.GAS_WEB_APP_URL = backendUrl;
+          VisionConfig.runtimeConfig = cfg;
+          VisionConfig.runtimeLoaded = true;
+          VisionConfig.runtimeError = '';
+          VisionConfig.dataSourceMode = 'BACKEND_REAL_RUNTIME';
+          VisionConfig.useMockWhenNoUrl = false;
+
+          // Override técnico temporal: solo se permite si se solicita explícitamente con ?override=1.
+          if (VisionConfig.allowLocalBackendOverride && localOverrideRequested) {
+            const local = this.normalizeBackendUrl(localStorage.getItem('VISION_GAS_WEB_APP_URL') || '');
+            if (local) {
+              VisionConfig.GAS_WEB_APP_URL = local;
+              VisionConfig.dataSourceMode = 'BACKEND_REAL_OVERRIDE_LOCAL';
+            }
+          }
+        } catch (err) {
+          VisionConfig.runtimeLoaded = false;
+          VisionConfig.runtimeError = err.message || String(err);
+          VisionConfig.dataSourceMode = 'ERROR_RUNTIME';
+          VisionConfig.GAS_WEB_APP_URL = '';
+          VisionConfig.useMockWhenNoUrl = false;
+        }
+      },
+
+      normalizeBackendUrl(value) {
+        const url = String(value || '').trim();
+        if (!url) return '';
+        if (!/^https:\/\/script\.google\.com\/macros\/s\//i.test(url)) return '';
+        return url.replace(/\?+$/, '');
+      }
+    };
+
+    /***********************************************************
+     * 5. Cliente API JSONP
      ***********************************************************/
     const VisionAPI = {
       jsonp(action, params = {}) {
         if (!VisionConfig.GAS_WEB_APP_URL) {
           if (VisionConfig.useMockWhenNoUrl) return Promise.resolve(VisionMock.get(action, params));
-          return Promise.reject(new Error('Falta configurar GAS_WEB_APP_URL.'));
+          const detalle = VisionConfig.runtimeError
+            ? ' No se pudo cargar vision.runtime.json: ' + VisionConfig.runtimeError
+            : '';
+          return Promise.reject(new Error('No hay backend real disponible por configuración runtime.' + detalle));
         }
 
         const callbackName = 'visionCb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
@@ -3778,7 +3857,7 @@
             </div>
             <div class="vision-intro-message">
               <div class="vision-intro-kicker"><span class="pulse"></span> Centro Operativo Inteligente</div>
-              <h2 class="vision-intro-title">Visión observa, prioriza y comunica la operación del Campus Virtual e Implementación respecto al desarrollo de las clases.</h2>
+              <h2 class="vision-intro-title">Visión observa, prioriza y comunica la operación del Campus Virtual.</h2>
               <p class="vision-intro-lead">Visión reemplaza trabajo manual de seguimiento: lee fuentes vivas, detecta señales críticas, organiza incidencias y entrega una cabina de control para tomar decisiones con evidencia.</p>
               <div class="vision-intro-metrics">
                 <div class="vision-intro-metric"><small>Clases hoy</small><strong>${VisionUtils.esc(k.clasesMonitoreadasHoy || 0)}</strong></div>
@@ -4161,24 +4240,31 @@
         const s = VisionState.normalized.sistema;
         const e = VisionState.normalized.estado;
         const backendConfigured = !!VisionConfig.GAS_WEB_APP_URL;
+        const runtimeOk = VisionConfig.dataSourceMode === 'BACKEND_REAL_RUNTIME' || VisionConfig.dataSourceMode === 'BACKEND_REAL_OVERRIDE_LOCAL';
         return `
           <section class="panel">
-            <div class="panel-header"><div><h2 class="panel-title">Conexión backend</h2><div class="panel-subtitle">Permite pasar de mock local a operación real usando el Web App de Apps Script.</div></div></div>
+            <div class="panel-header"><div><h2 class="panel-title">Conexión backend</h2><div class="panel-subtitle">Visión carga la Web App productiva desde configuración runtime, sin que cada usuario deba pegar la URL.</div></div></div>
             <div class="panel-body config-grid">
               <div class="${backendConfigured ? 'backend-ok' : 'backend-warning'}">
                 ${backendConfigured
-                  ? 'Frontend conectado a una URL de Apps Script. Las vistas consultarán snapshots reales del backend.'
-                  : 'El frontend está usando mock local. La interfaz funciona, pero todavía no está leyendo operación real.'}
+                  ? 'Frontend conectado al backend real mediante configuración runtime. Las vistas consultan snapshots reales del backend.'
+                  : 'No hay backend real disponible. Revise vision.runtime.json; Visión no usará Mock automáticamente en producción.'}
               </div>
               <div class="config-field">
-                <label class="config-label" for="backendUrlInput">URL Web App Apps Script</label>
-                <input id="backendUrlInput" class="config-input" value="${VisionUtils.esc(VisionConfig.GAS_WEB_APP_URL)}" placeholder="https://script.google.com/macros/s/AKfycb.../exec" />
+                <label class="config-label">Fuente de configuración</label>
+                <div class="config-input" style="display:flex;align-items:center;min-height:38px;">${VisionUtils.esc(runtimeOk ? VisionConfig.runtimeConfigUrl : (VisionConfig.runtimeError || 'Runtime pendiente'))}</div>
+              </div>
+              <div class="config-field">
+                <label class="config-label">Backend productivo activo</label>
+                <div class="config-input" style="display:flex;align-items:center;min-height:38px;">${VisionUtils.esc(backendConfigured ? 'Web App de Google Apps Script configurada' : 'No disponible')}</div>
               </div>
               <div class="config-actions">
-                <button class="action-btn primary" onclick="VisionActions.saveBackendUrl()">Guardar URL y recargar snapshot</button>
-                <button class="action-btn" onclick="VisionActions.clearBackendUrl()">Volver a mock local</button>
+                <button class="action-btn primary" onclick="VisionActions.reloadRuntimeConfig()">Recargar configuración runtime</button>
                 <button class="action-btn" onclick="VisionActions.testLiveEndpoint()">Probar operación viva</button>
                 <button class="action-btn" onclick="VisionActions.testAllEndpoints()">Probar endpoints</button>
+              </div>
+              <div class="backend-warning">
+                El modo Mock queda reservado para demo explícita mediante <b>?demo=1</b>. En producción, si el backend real no responde, Visión debe mostrar error y no simular operación.
               </div>
             </div>
           </section>
@@ -4202,7 +4288,9 @@
             <div class="panel-header"><div><h2 class="panel-title">Estado técnico visible</h2><div class="panel-subtitle">Parámetros frontend y lectura del snapshot.</div></div></div>
             <div class="panel-body detail-grid">
               ${this.detailRow('Frontend', VisionConfig.version)}
-              ${this.detailRow('Modo datos', backendConfigured ? 'BACKEND REAL' : 'MOCK LOCAL')}
+              ${this.detailRow('Modo datos', VisionConfig.dataSourceMode)}
+              ${this.detailRow('Runtime cargado', VisionConfig.runtimeLoaded ? 'SI' : 'NO')}
+              ${this.detailRow('Error runtime', VisionConfig.runtimeError || '—')}
               ${this.detailRow('Endpoint vivo', VisionConfig.endpoints.live)}
               ${this.detailRow('Endpoint salud implementación', VisionConfig.endpoints.implementation)}
               ${this.detailRow('Fuente', s.fuente || '—')}
@@ -4605,24 +4693,18 @@
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       },
 
-      saveBackendUrl() {
-        const input = document.getElementById('backendUrlInput');
-        const url = String(input?.value || '').trim();
-        if (!url) {
-          alert('Debes ingresar la URL publicada del Web App de Apps Script.');
-          return;
-        }
-        localStorage.setItem('VISION_GAS_WEB_APP_URL', url);
-        VisionConfig.GAS_WEB_APP_URL = url;
+      async reloadRuntimeConfig() {
+        await VisionRuntime.load();
         VisionState.normalized.saludImplementacion = null;
         VisionApp.loadLive();
       },
 
+      saveBackendUrl() {
+        alert('La URL productiva ya no se guarda desde esta pantalla. Edite vision.runtime.json en el repositorio para cambiar el backend real.');
+      },
+
       clearBackendUrl() {
-        localStorage.removeItem('VISION_GAS_WEB_APP_URL');
-        VisionConfig.GAS_WEB_APP_URL = '';
-        VisionState.normalized.saludImplementacion = null;
-        VisionApp.loadLive();
+        alert('El modo Mock ya no se activa limpiando la URL. Para demo controlada use ?demo=1.');
       },
 
       async testLiveEndpoint() {
@@ -4726,7 +4808,9 @@
      ***********************************************************/
     const VisionApp = {
       async init() {
-        this.showLoaderProgress(15, 'Preparando shell de aplicación.');
+        this.showLoaderProgress(12, 'Preparando shell de aplicación.');
+        await VisionRuntime.load();
+        this.showLoaderProgress(20, VisionConfig.GAS_WEB_APP_URL ? 'Backend real detectado por configuración runtime.' : 'No se detectó backend real por configuración runtime.');
         VisionViews.render();
         await this.loadLive();
         this.startTimers();
@@ -4828,14 +4912,14 @@
           sistema: {
             nombre: 'Visión',
             modulo: 'Snapshot Vivo Operacional',
-            version: 'mock vNext',
+            version: 'mock vNext · demo explícita',
             generadoEn: now.toLocaleString('es-CL'),
             generadoEnMs: now.getTime(),
             fuente: 'MOCK · EVENTOS_CLASE + INCIDENCIAS + LOG_NOTIFICACIONES + BANDEJA_INCIDENCIAS'
           },
           estado: {
             operativo: 'OPERANDO',
-            detalle: 'Modo preview: shell vNext conectado a mock local. Configure GAS_WEB_APP_URL para operación real.',
+            detalle: 'Modo demo explícito. En producción Visión debe leer backend real desde vision.runtime.json.',
             esSnapshotVivo: true
           },
           kpis: {
@@ -4892,7 +4976,7 @@
           lecturaOperativa: [
             'Visión mantiene operación viva con clases activas, alertas Telegram y bandeja humana disponible.',
             'Existe al menos una incidencia crítica abierta que requiere revisión inmediata.',
-            'El frontend está en modo preview; al configurar GAS_WEB_APP_URL leerá datos reales del backend.'
+            'El frontend está en modo demo explícito; en producción lee datos reales desde configuración runtime.'
           ]
         };
       },
