@@ -1,6 +1,6 @@
 {
   "environment": "production",
-  "backendUrl": "REEMPLAZAR_POR_URL_WEB_APP_PRODUCTIVA_DE_GOOGLE_APPS_SCRIPT",
+  "backendUrl": "https://script.google.com/macros/s/AKfycbwkrOVT4hZ-vKM7avoJKaZYyJpygSr-QV7oRILybqKa5moZhp7pI8h_MQM_YV9tfwcd/exec",
   "defaultDataSource": "real",
   "mockAllowed": false,
   "safeViewDefault": true,
