@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Visión · Tester de Autenticación V2.1C2</title>
+  <style>
+    :root{
+      --bg:#0f172a;--panel:#111827;--card:#ffffff;--muted:#64748b;--line:#e5e7eb;
+      --text:#0f172a;--brand:#0ea5b7;--ok:#0f766e;--bad:#b91c1c;--warn:#92400e;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#0f172a,#123a54);color:var(--text);}
+    .wrap{max-width:980px;margin:32px auto;padding:0 18px;}
+    .hero{color:#fff;margin-bottom:18px;}
+    .hero h1{font-size:24px;margin:0 0 6px;font-weight:600;letter-spacing:.2px;}
+    .hero p{margin:0;color:#cbd5e1;font-size:14px;line-height:1.45;}
+    .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.85fr);gap:16px;align-items:start;}
+    .card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.18);overflow:hidden;}
+    .card header{padding:16px 18px;border-bottom:1px solid var(--line);background:#f8fafc;}
+    .card header h2{font-size:16px;margin:0;font-weight:600;}
+    .body{padding:18px;}
+    label{display:block;font-size:12px;color:#475569;margin:0 0 6px;font-weight:600;}
+    input{width:100%;height:40px;border:1px solid #cbd5e1;border-radius:10px;padding:0 12px;font-size:14px;outline:none;background:#fff;}
+    input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(14,165,183,.15)}
+    .field{margin-bottom:14px;}
+    .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+    button{border:0;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;background:#e2e8f0;color:#0f172a;}
+    button.primary{background:var(--brand);color:#fff;}
+    button.danger{background:#fee2e2;color:#991b1b;}
+    button:disabled{opacity:.55;cursor:not-allowed;}
+    .status{border-radius:12px;padding:12px 14px;margin-bottom:14px;background:#f1f5f9;color:#334155;font-size:13px;line-height:1.45;}
+    .status.ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;}
+    .status.bad{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
+    .status.warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+    .kv{font-size:12px;line-height:1.7;color:#475569;}
+    .kv b{color:#0f172a;font-weight:600;}
+    pre{margin:0;white-space:pre-wrap;word-break:break-word;background:#0b1220;color:#dbeafe;border-radius:12px;padding:14px;font-size:12px;line-height:1.45;min-height:180px;max-height:520px;overflow:auto;}
+    .small{font-size:12px;color:#64748b;line-height:1.45;margin-top:10px;}
+    .sep{height:1px;background:#e5e7eb;margin:16px 0;}
+    .pill{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;background:#e0f2fe;color:#075985;font-weight:600;margin-left:6px;}
+    @media(max-width:820px){.grid{grid-template-columns:1fr}.wrap{margin:18px auto}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Visión · Tester de Autenticación <span class="pill">V2.1C2</span></h1>
+      <p>Prueba controlada de login nominal por desafío. Esta pantalla no activa aún sesión obligatoria global; solo valida que el backend cree sesiones correctamente.</p>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <header><h2>Ingreso nominal</h2></header>
+        <div class="body">
+          <div id="status" class="status warn">Cargando configuración runtime...</div>
+
+          <div class="field">
+            <label for="backendUrl">Backend activo</label>
+            <input id="backendUrl" type="text" readonly />
+            <div class="small">Se lee desde <b>vision.runtime.json</b>. No depende de la pestaña Configuración.</div>
+          </div>
+
+          <div class="field">
+            <label for="email">Correo institucional</label>
+            <input id="email" type="email" autocomplete="username" placeholder="usuario@pre-ucv.cl" />
+          </div>
+
+          <div class="field">
+            <label for="password">Contraseña temporal</label>
+            <input id="password" type="password" autocomplete="current-password" placeholder="Contraseña entregada individualmente" />
+          </div>
+
+          <div class="btnrow">
+            <button id="btnLogin" class="primary">Iniciar sesión de prueba</button>
+            <button id="btnMe">Probar sesión</button>
+            <button id="btnLogout" class="danger">Cerrar sesión</button>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="kv" id="sessionInfo">
+            <b>Sesión:</b> sin sesión activa<br />
+            <b>Usuario:</b> -<br />
+            <b>Rol:</b> -<br />
+            <b>Expira:</b> -
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="kv" id="clientInfo"></div>
+          <div class="small">La IP se obtiene como <b>IP declarada</b> mediante un servicio externo. No reemplaza un gateway de seguridad, pero sirve como evidencia auxiliar.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <header><h2>Respuesta técnica</h2></header>
+        <div class="body">
+          <pre id="output">Esperando prueba...</pre>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const FRONTEND_VERSION = 'vision-auth-tester-v2.1C2';
+    const LS_SESSION = 'VISION_SESSION_TOKEN_V2_1C2';
+    const LS_SESSION_META = 'VISION_SESSION_META_V2_1C2';
+    const LS_DEVICE_ID = 'VISION_DEVICE_ID_V2_1C2';
+
+    const $ = (id) => document.getElementById(id);
+    let BACKEND_URL = '';
+    let IP_DECLARADA = '';
+    let IP_FUENTE = '';
+    let CLIENT_META = {};
+
+    function setStatus(msg, type='warn'){
+      const el = $('status');
+      el.className = 'status ' + type;
+      el.textContent = msg;
+    }
+
+    function print(obj){
+      $('output').textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2);
+    }
+
+    async function sha256Hex(text){
+      const data = new TextEncoder().encode(String(text || ''));
+      const digest = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    function normalizeEmail(email){
+      return String(email || '').trim().toLowerCase();
+    }
+
+    async function hashPasswordVision(email, password, salt, iterations){
+      email = normalizeEmail(email);
+      let material = 'VISION_AUTH_V2_1C1|' + email + '|' + salt + '|' + String(password || '');
+      for(let i=0; i<Number(iterations || 5000); i++){
+        material = await sha256Hex(material + '|' + salt + '|' + i);
+      }
+      return material;
+    }
+
+    async function computeProof(challenge, email, password){
+      const iterations = challenge.password_iterations || 5000;
+      const passwordHash = await hashPasswordVision(email, password, challenge.salt, iterations);
+      const raw = String(challenge.proof_prefix || 'VISION_AUTH_PROOF_V2_1C2|') +
+        normalizeEmail(email) + '|' + challenge.challenge_id + '|' + challenge.nonce + '|' + passwordHash;
+      return await sha256Hex(raw);
+    }
+
+    function getBrowser(){
+      const ua = navigator.userAgent || '';
+      if(/Edg\//.test(ua)) return 'Edge';
+      if(/Chrome\//.test(ua)) return 'Chrome';
+      if(/Firefox\//.test(ua)) return 'Firefox';
+      if(/Safari\//.test(ua)) return 'Safari';
+      return 'Desconocido';
+    }
+
+    function getOS(){
+      const ua = navigator.userAgent || '';
+      if(/Windows/i.test(ua)) return 'Windows';
+      if(/Mac OS/i.test(ua)) return 'macOS';
+      if(/Android/i.test(ua)) return 'Android';
+      if(/iPhone|iPad/i.test(ua)) return 'iOS';
+      if(/Linux/i.test(ua)) return 'Linux';
+      return 'Desconocido';
+    }
+
+    function ensureDeviceId(){
+      let id = localStorage.getItem(LS_DEVICE_ID);
+      if(!id){
+        const arr = new Uint8Array(24);
+        crypto.getRandomValues(arr);
+        id = Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+        localStorage.setItem(LS_DEVICE_ID, id);
+      }
+      return id;
+    }
+
+    async function buildClientMeta(){
+      const deviceId = ensureDeviceId();
+      const screenSize = `${screen.width}x${screen.height}@${window.devicePixelRatio || 1}`;
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      const rawDevice = [
+        'VISION_DEVICE_V2_1C2', deviceId, navigator.userAgent || '', navigator.language || '',
+        timezone, screenSize, navigator.platform || ''
+      ].join('|');
+      const deviceHash = await sha256Hex(rawDevice);
+      CLIENT_META = {
+        device_hash: deviceHash,
+        user_agent: navigator.userAgent || '',
+        navegador: getBrowser(),
+        sistema_operativo: getOS(),
+        idioma: navigator.language || '',
+        timezone,
+        screen_size: screenSize,
+        frontend_version: FRONTEND_VERSION,
+        ip_declarada: IP_DECLARADA,
+        ip_fuente: IP_FUENTE
+      };
+      $('clientInfo').innerHTML =
+        `<b>Device hash:</b> ${deviceHash.slice(0,18)}...<br>` +
+        `<b>Navegador:</b> ${CLIENT_META.navegador}<br>` +
+        `<b>Sistema:</b> ${CLIENT_META.sistema_operativo}<br>` +
+        `<b>Zona horaria:</b> ${timezone}<br>` +
+        `<b>Resolución:</b> ${screenSize}<br>` +
+        `<b>IP declarada:</b> ${IP_DECLARADA || 'no disponible'}`;
+      return CLIENT_META;
+    }
+
+    async function fetchDeclaredIp(){
+      try{
+        const res = await fetch('https://api.ipify.org?format=json', {cache:'no-store'});
+        if(!res.ok) throw new Error('ipify status ' + res.status);
+        const data = await res.json();
+        IP_DECLARADA = data.ip || '';
+        IP_FUENTE = 'api.ipify.org';
+      }catch(err){
+        IP_DECLARADA = '';
+        IP_FUENTE = 'NO_DISPONIBLE';
+      }
+    }
+
+    function jsonp(params){
+      return new Promise((resolve, reject) => {
+        if(!BACKEND_URL) return reject(new Error('Backend no configurado'));
+        const cb = 'visionAuthCb_' + Date.now() + '_' + Math.floor(Math.random()*1000000);
+        const url = new URL(BACKEND_URL);
+        Object.entries(params || {}).forEach(([k,v]) => url.searchParams.set(k, v == null ? '' : String(v)));
+        url.searchParams.set('callback', cb);
+        const script = document.createElement('script');
+        const timeout = setTimeout(() => {
+          cleanup(); reject(new Error('Timeout JSONP'));
+        }, 30000);
+        function cleanup(){
+          clearTimeout(timeout);
+          try{ delete window[cb]; }catch(e){ window[cb] = undefined; }
+          if(script.parentNode) script.parentNode.removeChild(script);
+        }
+        window[cb] = (payload) => { cleanup(); resolve(payload); };
+        script.onerror = () => { cleanup(); reject(new Error('No se pudo cargar JSONP')); };
+        script.src = url.toString();
+        document.head.appendChild(script);
+      });
+    }
+
+    function metaParams(tab='Auth'){
+      return {
+        device_hash: CLIENT_META.device_hash || '',
+        user_agent: CLIENT_META.user_agent || '',
+        navegador: CLIENT_META.navegador || '',
+        sistema_operativo: CLIENT_META.sistema_operativo || '',
+        idioma: CLIENT_META.idioma || '',
+        timezone: CLIENT_META.timezone || '',
+        screen_size: CLIENT_META.screen_size || '',
+        frontend_version: CLIENT_META.frontend_version || FRONTEND_VERSION,
+        ip_declarada: CLIENT_META.ip_declarada || '',
+        ip_fuente: CLIENT_META.ip_fuente || '',
+        tab
+      };
+    }
+
+    async function loadRuntime(){
+      const candidates = ['./vision.runtime.json', 'vision.runtime.json'];
+      let lastErr = null;
+      for(const src of candidates){
+        try{
+          const res = await fetch(src + '?v=' + Date.now(), {cache:'no-store'});
+          if(!res.ok) throw new Error('HTTP ' + res.status);
+          const cfg = await res.json();
+          BACKEND_URL = cfg.backendUrl || cfg.backend_url || cfg.webAppUrl || '';
+          if(!BACKEND_URL) throw new Error('vision.runtime.json no contiene backendUrl');
+          $('backendUrl').value = BACKEND_URL;
+          setStatus('Configuración runtime cargada. Listo para probar login.', 'ok');
+          return;
+        }catch(err){ lastErr = err; }
+      }
+      setStatus('No se pudo cargar vision.runtime.json. Sube este tester junto al runtime o pega el backend manualmente en el código para pruebas.', 'bad');
+      throw lastErr;
+    }
+
+    function updateSessionInfo(meta){
+      if(!meta){
+        try{ meta = JSON.parse(localStorage.getItem(LS_SESSION_META) || 'null'); }catch(e){ meta = null; }
+      }
+      const token = localStorage.getItem(LS_SESSION);
+      if(!token || !meta){
+        $('sessionInfo').innerHTML = '<b>Sesión:</b> sin sesión activa<br><b>Usuario:</b> -<br><b>Rol:</b> -<br><b>Expira:</b> -';
+        return;
+      }
+      $('sessionInfo').innerHTML =
+        `<b>Sesión:</b> ${String(meta.session_id || '').slice(0,18)}...<br>` +
+        `<b>Usuario:</b> ${meta.usuario?.nombre || ''} (${meta.usuario?.email || ''})<br>` +
+        `<b>Rol:</b> ${meta.usuario?.rol || ''}<br>` +
+        `<b>Expira:</b> ${meta.expira_en || ''}`;
+    }
+
+    async function login(){
+      const email = normalizeEmail($('email').value);
+      const password = $('password').value;
+      if(!email || !password){ setStatus('Debes indicar correo y contraseña temporal.', 'bad'); return; }
+      setStatus('Solicitando desafío...', 'warn');
+      print('Solicitando challenge...');
+
+      const challenge = await jsonp({ action:'visionAuthChallenge', email, ...metaParams('Login') });
+      if(!challenge.ok){ setStatus(challenge.error || 'Challenge denegado.', 'bad'); print(challenge); return; }
+
+      setStatus('Calculando proof local...', 'warn');
+      const proof = await computeProof(challenge, email, password);
+
+      setStatus('Validando credenciales...', 'warn');
+      const loginRes = await jsonp({
+        action:'visionAuthLoginProof', email,
+        challenge_id: challenge.challenge_id,
+        proof,
+        ...metaParams('Login')
+      });
+
+      print(loginRes);
+      if(!loginRes.ok){ setStatus(loginRes.error || 'Login denegado.', 'bad'); return; }
+
+      localStorage.setItem(LS_SESSION, loginRes.session_token);
+      localStorage.setItem(LS_SESSION_META, JSON.stringify({
+        session_id: loginRes.session_id,
+        expira_en: loginRes.expira_en,
+        usuario: loginRes.usuario,
+        permisos: loginRes.permisos
+      }));
+      $('password').value = '';
+      updateSessionInfo();
+      setStatus('Sesión creada correctamente. Revisa SESIONES_VISION y LOG_SEGURIDAD_VISION.', 'ok');
+    }
+
+    async function me(){
+      const token = localStorage.getItem(LS_SESSION);
+      if(!token){ setStatus('No hay sesión local para probar.', 'bad'); return; }
+      const res = await jsonp({ action:'visionAuthMe', session_token: token, ...metaParams('AuthMe') });
+      print(res);
+      if(res.ok){
+        setStatus('Sesión válida.', 'ok');
+        updateSessionInfo({ session_id: res.session_id, expira_en: res.expira_en, usuario: res.usuario, permisos: res.permisos });
+      } else {
+        setStatus(res.error || 'Sesión inválida.', 'bad');
+      }
+    }
+
+    async function logout(){
+      const token = localStorage.getItem(LS_SESSION);
+      if(!token){ updateSessionInfo(null); return; }
+      const res = await jsonp({ action:'visionAuthLogout', session_token: token, ...metaParams('Logout') });
+      localStorage.removeItem(LS_SESSION);
+      localStorage.removeItem(LS_SESSION_META);
+      updateSessionInfo(null);
+      print(res);
+      setStatus('Sesión cerrada localmente.', 'ok');
+    }
+
+    $('btnLogin').addEventListener('click', () => login().catch(err => { setStatus(err.message, 'bad'); print(String(err.stack || err)); }));
+    $('btnMe').addEventListener('click', () => me().catch(err => { setStatus(err.message, 'bad'); print(String(err.stack || err)); }));
+    $('btnLogout').addEventListener('click', () => logout().catch(err => { setStatus(err.message, 'bad'); print(String(err.stack || err)); }));
+
+    (async function init(){
+      try{
+        await fetchDeclaredIp();
+        await buildClientMeta();
+        await loadRuntime();
+        updateSessionInfo();
+      }catch(err){
+        print(String(err.stack || err));
+      }
+    })();
+  </script>
+</body>
+</html>
