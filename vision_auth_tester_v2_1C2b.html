@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Visión · Tester de Autenticación V2.1C2b</title>
+  <style>
+    :root{
+      --bg:#0f172a;--panel:#111827;--card:#ffffff;--muted:#64748b;--line:#e5e7eb;
+      --text:#0f172a;--brand:#0ea5b7;--ok:#0f766e;--bad:#b91c1c;--warn:#92400e;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#0f172a,#123a54);color:var(--text);}
+    .wrap{max-width:1060px;margin:32px auto;padding:0 18px;}
+    .hero{color:#fff;margin-bottom:18px;}
+    .hero h1{font-size:24px;margin:0 0 6px;font-weight:600;letter-spacing:.2px;}
+    .hero p{margin:0;color:#cbd5e1;font-size:14px;line-height:1.45;}
+    .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.9fr);gap:16px;align-items:start;}
+    .card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.18);overflow:hidden;}
+    .card header{padding:16px 18px;border-bottom:1px solid var(--line);background:#f8fafc;}
+    .card header h2{font-size:16px;margin:0;font-weight:600;}
+    .body{padding:18px;}
+    label{display:block;font-size:12px;color:#475569;margin:0 0 6px;font-weight:600;}
+    input{width:100%;height:40px;border:1px solid #cbd5e1;border-radius:10px;padding:0 12px;font-size:14px;outline:none;background:#fff;}
+    input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(14,165,183,.15)}
+    .field{margin-bottom:14px;}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+    button{border:0;border-radius:10px;padding:10px 14px;font-size:13px;font-weight:600;cursor:pointer;background:#e2e8f0;color:#0f172a;}
+    button.primary{background:var(--brand);color:#fff;}
+    button.danger{background:#fee2e2;color:#991b1b;}
+    button.secure{background:#0f766e;color:#fff;}
+    button:disabled{opacity:.55;cursor:not-allowed;}
+    .status{border-radius:12px;padding:12px 14px;margin-bottom:14px;background:#f1f5f9;color:#334155;font-size:13px;line-height:1.45;}
+    .status.ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;}
+    .status.bad{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;}
+    .status.warn{background:#fffbeb;color:#92400e;border:1px solid #fde68a;}
+    .kv{font-size:12px;line-height:1.7;color:#475569;}
+    .kv b{color:#0f172a;font-weight:600;}
+    pre{margin:0;white-space:pre-wrap;word-break:break-word;background:#0b1220;color:#dbeafe;border-radius:12px;padding:14px;font-size:12px;line-height:1.45;min-height:240px;max-height:680px;overflow:auto;}
+    .small{font-size:12px;color:#64748b;line-height:1.45;margin-top:10px;}
+    .sep{height:1px;background:#e5e7eb;margin:16px 0;}
+    .pill{display:inline-block;font-size:11px;padding:3px 8px;border-radius:999px;background:#e0f2fe;color:#075985;font-weight:600;margin-left:6px;}
+    @media(max-width:860px){.grid{grid-template-columns:1fr}.two{grid-template-columns:1fr}.wrap{margin:18px auto}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Visión · Tester de Autenticación <span class="pill">V2.1C2b</span></h1>
+      <p>Prueba controlada de login nominal, sesión y cambio obligatorio de contraseña. Esta pantalla todavía no activa sesión obligatoria global sobre todo Visión.</p>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <header><h2>Ingreso nominal y cambio de contraseña</h2></header>
+        <div class="body">
+          <div id="status" class="status warn">Cargando configuración runtime...</div>
+
+          <div class="field">
+            <label for="backendUrl">Backend activo</label>
+            <input id="backendUrl" type="text" readonly />
+            <div class="small">Se lee desde <b>vision.runtime.json</b>. No depende de la pestaña Configuración.</div>
+          </div>
+
+          <div class="field">
+            <label for="email">Correo institucional</label>
+            <input id="email" type="email" autocomplete="username" placeholder="usuario@pre-ucv.cl" />
+          </div>
+
+          <div class="field">
+            <label for="password">Contraseña actual / temporal</label>
+            <input id="password" type="password" autocomplete="current-password" placeholder="Contraseña entregada individualmente" />
+          </div>
+
+          <div class="btnrow">
+            <button id="btnLogin" class="primary">Iniciar sesión</button>
+            <button id="btnMe">Probar sesión</button>
+            <button id="btnLogout" class="danger">Cerrar sesión</button>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="two">
+            <div class="field">
+              <label for="newPassword">Nueva contraseña</label>
+              <input id="newPassword" type="password" autocomplete="new-password" placeholder="Mínimo 12 caracteres" />
+            </div>
+            <div class="field">
+              <label for="newPassword2">Confirmar nueva contraseña</label>
+              <input id="newPassword2" type="password" autocomplete="new-password" placeholder="Repetir nueva contraseña" />
+            </div>
+          </div>
+          <div class="btnrow">
+            <button id="btnChangePassword" class="secure">Cambiar contraseña</button>
+          </div>
+          <div class="small">La contraseña nueva no se envía como texto plano. El tester calcula una derivación criptográfica local y el backend actualiza hash + salt.</div>
+
+          <div class="sep"></div>
+
+          <div class="kv" id="sessionInfo">
+            <b>Sesión:</b> sin sesión activa<br />
+            <b>Usuario:</b> -<br />
+            <b>Rol:</b> -<br />
+            <b>Expira:</b> -
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="kv" id="clientInfo"></div>
+          <div class="small">La IP se obtiene como <b>IP declarada</b> mediante un servicio externo. No reemplaza un gateway de seguridad, pero sirve como evidencia auxiliar.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <header><h2>Respuesta técnica</h2></header>
+        <div class="body">
+          <pre id="output">Esperando prueba...</pre>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const FRONTEND_VERSION = 'vision-auth-tester-v2.1C2b';
+    const LS_SESSION = 'VISION_SESSION_TOKEN_V2_1C2';
+    const LS_SESSION_META = 'VISION_SESSION_META_V2_1C2';
+    const LS_DEVICE_ID = 'VISION_DEVICE_ID_V2_1C2';
+
+    const $ = (id) => document.getElementById(id);
+    let BACKEND_URL = '';
+    let IP_DECLARADA = '';
+    let IP_FUENTE = '';
+    let CLIENT_META = {};
+
+    function setStatus(msg, type='warn'){
+      const el = $('status');
+      el.className = 'status ' + type;
+      el.textContent = msg;
+    }
+
+    function redact(obj){
+      const clone = JSON.parse(JSON.stringify(obj || {}));
+      if(clone.session_token) clone.session_token = clone.session_token.slice(0,12) + '...REDACTED';
+      if(clone.new_password_hash) clone.new_password_hash = 'REDACTED';
+      return clone;
+    }
+
+    function print(obj){
+      $('output').textContent = typeof obj === 'string' ? obj : JSON.stringify(redact(obj), null, 2);
+    }
+
+    async function sha256Hex(text){
+      const data = new TextEncoder().encode(String(text || ''));
+      const digest = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    function normalizeEmail(email){
+      return String(email || '').trim().toLowerCase();
+    }
+
+    async function hashPasswordVision(email, password, salt, iterations){
+      email = normalizeEmail(email);
+      let material = 'VISION_AUTH_V2_1C1|' + email + '|' + salt + '|' + String(password || '');
+      for(let i=0; i<Number(iterations || 5000); i++){
+        material = await sha256Hex(material + '|' + salt + '|' + i);
+      }
+      return material;
+    }
+
+    async function computeLoginProof(challenge, email, password){
+      const iterations = challenge.password_iterations || 5000;
+      const passwordHash = await hashPasswordVision(email, password, challenge.salt, iterations);
+      const raw = String(challenge.proof_prefix || 'VISION_AUTH_PROOF_V2_1C2|') +
+        normalizeEmail(email) + '|' + challenge.challenge_id + '|' + challenge.nonce + '|' + passwordHash;
+      return await sha256Hex(raw);
+    }
+
+    async function computeOldPasswordProof(change, email, sessionId, oldPassword){
+      const iterations = change.password_iterations || 5000;
+      const oldHash = await hashPasswordVision(email, oldPassword, change.old_salt, iterations);
+      const raw = String(change.old_proof_prefix || 'VISION_CHANGE_OLD_PROOF_V2_1C2B|') +
+        normalizeEmail(email) + '|' + sessionId + '|' + change.change_id + '|' + change.nonce + '|' + oldHash;
+      return await sha256Hex(raw);
+    }
+
+    async function computeNewPasswordHash(change, email, newPassword){
+      const iterations = change.password_iterations || 5000;
+      return await hashPasswordVision(email, newPassword, change.new_salt, iterations);
+    }
+
+    function passwordPolicyOk(password){
+      const p = String(password || '');
+      return p.length >= 12 && /[a-z]/.test(p) && /[A-Z]/.test(p) && /[0-9]/.test(p) && /[^A-Za-z0-9]/.test(p);
+    }
+
+    function getBrowser(){
+      const ua = navigator.userAgent || '';
+      if(/Edg\//.test(ua)) return 'Edge';
+      if(/Chrome\//.test(ua)) return 'Chrome';
+      if(/Firefox\//.test(ua)) return 'Firefox';
+      if(/Safari\//.test(ua)) return 'Safari';
+      return 'Desconocido';
+    }
+
+    function getOS(){
+      const ua = navigator.userAgent || '';
+      if(/Windows/i.test(ua)) return 'Windows';
+      if(/Mac OS/i.test(ua)) return 'macOS';
+      if(/Android/i.test(ua)) return 'Android';
+      if(/iPhone|iPad/i.test(ua)) return 'iOS';
+      if(/Linux/i.test(ua)) return 'Linux';
+      return 'Desconocido';
+    }
+
+    function ensureDeviceId(){
+      let id = localStorage.getItem(LS_DEVICE_ID);
+      if(!id){
+        const arr = new Uint8Array(24);
+        crypto.getRandomValues(arr);
+        id = Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+        localStorage.setItem(LS_DEVICE_ID, id);
+      }
+      return id;
+    }
+
+    async function buildClientMeta(){
+      const deviceId = ensureDeviceId();
+      const screenSize = `${screen.width}x${screen.height}@${window.devicePixelRatio || 1}`;
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      const rawDevice = [
+        'VISION_DEVICE_V2_1C2', deviceId, navigator.userAgent || '', navigator.language || '',
+        timezone, screenSize, navigator.platform || ''
+      ].join('|');
+      const deviceHash = await sha256Hex(rawDevice);
+      CLIENT_META = {
+        device_hash: deviceHash,
+        user_agent: navigator.userAgent || '',
+        navegador: getBrowser(),
+        sistema_operativo: getOS(),
+        idioma: navigator.language || '',
+        timezone,
+        screen_size: screenSize,
+        frontend_version: FRONTEND_VERSION,
+        ip_declarada: IP_DECLARADA,
+        ip_fuente: IP_FUENTE
+      };
+      $('clientInfo').innerHTML =
+        `<b>Device hash:</b> ${deviceHash.slice(0,18)}...<br>` +
+        `<b>Navegador:</b> ${CLIENT_META.navegador}<br>` +
+        `<b>Sistema:</b> ${CLIENT_META.sistema_operativo}<br>` +
+        `<b>Zona horaria:</b> ${timezone}<br>` +
+        `<b>Resolución:</b> ${screenSize}<br>` +
+        `<b>IP declarada:</b> ${IP_DECLARADA || 'no disponible'}`;
+      return CLIENT_META;
+    }
+
+    async function fetchDeclaredIp(){
+      try{
+        const res = await fetch('https://api.ipify.org?format=json', {cache:'no-store'});
+        if(!res.ok) throw new Error('ipify status ' + res.status);
+        const data = await res.json();
+        IP_DECLARADA = data.ip || '';
+        IP_FUENTE = 'ipify';
+      }catch(err){
+        IP_DECLARADA = '';
+        IP_FUENTE = 'NO_DISPONIBLE';
+      }
+    }
+
+    function jsonp(params){
+      return new Promise((resolve, reject) => {
+        if(!BACKEND_URL) return reject(new Error('Backend no configurado.'));
+        const cb = 'visionAuthCb_' + Date.now() + '_' + Math.floor(Math.random()*1000000);
+        const url = new URL(BACKEND_URL);
+        Object.entries(params || {}).forEach(([k,v]) => url.searchParams.set(k, v == null ? '' : String(v)));
+        Object.entries(CLIENT_META || {}).forEach(([k,v]) => url.searchParams.set(k, v == null ? '' : String(v)));
+        url.searchParams.set('callback', cb);
+        url.searchParams.set('_', String(Date.now()));
+        const script = document.createElement('script');
+        const timer = setTimeout(() => cleanup(new Error('Timeout consultando backend.')), 25000);
+        function cleanup(err, data){
+          clearTimeout(timer);
+          try{ delete window[cb]; }catch(e){}
+          if(script.parentNode) script.parentNode.removeChild(script);
+          err ? reject(err) : resolve(data);
+        }
+        window[cb] = (data) => cleanup(null, data);
+        script.onerror = () => cleanup(new Error('No se pudo cargar JSONP del backend.'));
+        script.src = url.toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    function updateSessionInfo(meta){
+      if(!meta){
+        const raw = localStorage.getItem(LS_SESSION_META);
+        meta = raw ? JSON.parse(raw) : null;
+      }
+      const token = localStorage.getItem(LS_SESSION);
+      if(!token || !meta){
+        $('sessionInfo').innerHTML = '<b>Sesión:</b> sin sesión activa<br><b>Usuario:</b> -<br><b>Rol:</b> -<br><b>Expira:</b> -';
+        return;
+      }
+      $('sessionInfo').innerHTML =
+        `<b>Sesión:</b> ${(meta.session_id || '').slice(0,24)}...<br>` +
+        `<b>Usuario:</b> ${(meta.usuario && meta.usuario.nombre) || '-'} (${(meta.usuario && meta.usuario.email) || '-'})<br>` +
+        `<b>Rol:</b> ${(meta.usuario && meta.usuario.rol) || '-'}<br>` +
+        `<b>Expira:</b> ${meta.expira_en || '-'}`;
+    }
+
+    async function loadRuntime(){
+      const res = await fetch('./vision.runtime.json?ts=' + Date.now(), {cache:'no-store'});
+      if(!res.ok) throw new Error('No se pudo cargar vision.runtime.json');
+      const cfg = await res.json();
+      BACKEND_URL = cfg.backendUrl || cfg.backend_url || '';
+      if(!BACKEND_URL) throw new Error('vision.runtime.json no contiene backendUrl');
+      $('backendUrl').value = BACKEND_URL;
+    }
+
+    async function login(){
+      const email = normalizeEmail($('email').value);
+      const password = $('password').value;
+      if(!email || !password){ setStatus('Debes indicar correo y contraseña actual.', 'bad'); return; }
+
+      setStatus('Solicitando desafío...', 'warn');
+      const challenge = await jsonp({ action:'visionAuthChallenge', email, tab:'Login' });
+      if(!challenge.ok){ print(challenge); setStatus(challenge.error || 'Challenge denegado.', 'bad'); return; }
+
+      setStatus('Calculando proof local...', 'warn');
+      const proof = await computeLoginProof(challenge, email, password);
+
+      setStatus('Enviando login proof...', 'warn');
+      const loginRes = await jsonp({ action:'visionAuthLoginProof', email, challenge_id:challenge.challenge_id, proof, tab:'Login' });
+      print(loginRes);
+      if(!loginRes.ok){ setStatus(loginRes.error || 'Login denegado.', 'bad'); return; }
+
+      localStorage.setItem(LS_SESSION, loginRes.session_token);
+      localStorage.setItem(LS_SESSION_META, JSON.stringify({
+        session_id: loginRes.session_id,
+        expira_en: loginRes.expira_en,
+        usuario: loginRes.usuario,
+        permisos: loginRes.permisos
+      }));
+      updateSessionInfo();
+      setStatus(loginRes.requiere_cambio_password ? 'Login correcto. Debes cambiar la contraseña temporal.' : 'Login correcto.', 'ok');
+    }
+
+    async function me(){
+      const token = localStorage.getItem(LS_SESSION);
+      if(!token){ setStatus('No hay sesión local.', 'bad'); return; }
+      const res = await jsonp({ action:'visionAuthMe', session_token:token, tab:'Login' });
+      print(res);
+      if(!res.ok){ setStatus(res.error || 'Sesión inválida.', 'bad'); return; }
+      localStorage.setItem(LS_SESSION_META, JSON.stringify({
+        session_id: res.session_id,
+        expira_en: res.expira_en,
+        usuario: res.usuario,
+        permisos: res.permisos
+      }));
+      updateSessionInfo();
+      setStatus('Sesión válida.', 'ok');
+    }
+
+    async function logout(){
+      const token = localStorage.getItem(LS_SESSION);
+      if(token){
+        try{ print(await jsonp({ action:'visionAuthLogout', session_token:token, tab:'Login' })); }catch(err){ print(String(err.message || err)); }
+      }
+      localStorage.removeItem(LS_SESSION);
+      localStorage.removeItem(LS_SESSION_META);
+      updateSessionInfo(null);
+      setStatus('Sesión local cerrada.', 'ok');
+    }
+
+    async function changePassword(){
+      const token = localStorage.getItem(LS_SESSION);
+      if(!token){ setStatus('Primero debes iniciar sesión.', 'bad'); return; }
+      const email = normalizeEmail($('email').value || (JSON.parse(localStorage.getItem(LS_SESSION_META) || '{}').usuario || {}).email);
+      const oldPass = $('password').value;
+      const newPass = $('newPassword').value;
+      const newPass2 = $('newPassword2').value;
+      const metaRaw = localStorage.getItem(LS_SESSION_META);
+      const sessionMeta = metaRaw ? JSON.parse(metaRaw) : {};
+      const sessionId = sessionMeta.session_id || '';
+
+      if(!email || !oldPass || !newPass || !newPass2){ setStatus('Completa contraseña actual, nueva contraseña y confirmación.', 'bad'); return; }
+      if(newPass !== newPass2){ setStatus('La confirmación no coincide.', 'bad'); return; }
+      if(oldPass === newPass){ setStatus('La nueva contraseña no puede ser igual a la actual.', 'bad'); return; }
+      if(!passwordPolicyOk(newPass)){
+        setStatus('La nueva contraseña debe tener mínimo 12 caracteres e incluir minúscula, mayúscula, número y símbolo.', 'bad');
+        return;
+      }
+
+      setStatus('Solicitando desafío de cambio...', 'warn');
+      const change = await jsonp({ action:'visionAuthChangePasswordChallenge', session_token:token, tab:'CambioPassword' });
+      if(!change.ok){ print(change); setStatus(change.error || 'No se pudo emitir desafío de cambio.', 'bad'); return; }
+
+      setStatus('Calculando pruebas locales...', 'warn');
+      const oldProof = await computeOldPasswordProof(change, email, sessionId, oldPass);
+      const newPasswordHash = await computeNewPasswordHash(change, email, newPass);
+
+      setStatus('Enviando cambio de contraseña...', 'warn');
+      const res = await jsonp({
+        action:'visionAuthChangePasswordProof',
+        session_token:token,
+        change_id:change.change_id,
+        old_proof:oldProof,
+        new_password_hash:newPasswordHash,
+        tab:'CambioPassword'
+      });
+      print(res);
+      if(!res.ok){ setStatus(res.error || 'Cambio denegado.', 'bad'); return; }
+
+      $('password').value = '';
+      $('newPassword').value = '';
+      $('newPassword2').value = '';
+      setStatus('Contraseña cambiada correctamente. Vuelve a iniciar sesión usando la nueva contraseña cuando cierres esta sesión.', 'ok');
+      await me();
+    }
+
+    async function init(){
+      try{
+        await loadRuntime();
+        await fetchDeclaredIp();
+        await buildClientMeta();
+        updateSessionInfo();
+        setStatus('Configuración runtime cargada. Listo para probar login y cambio de contraseña.', 'ok');
+      }catch(err){
+        setStatus(err.message || String(err), 'bad');
+        print(err.stack || String(err));
+      }
+    }
+
+    $('btnLogin').addEventListener('click', () => login().catch(err => { setStatus(err.message, 'bad'); print(String(err.stack || err)); }));
+    $('btnMe').addEventListener('click', () => me().catch(err => { setStatus(err.message, 'bad'); print(String(err.stack || err)); }));
+    $('btnLogout').addEventListener('click', () => logout().catch(err => { setStatus(err.message, 'bad'); print(String(err.stack || err)); }));
+    $('btnChangePassword').addEventListener('click', () => changePassword().catch(err => { setStatus(err.message, 'bad'); print(String(err.stack || err)); }));
+    init();
+  </script>
+</body>
+</html>
