@@ -32,7 +32,7 @@
       --radius-md: 6px;
       --radius-sm: 4px;
       --topbar-h: 46px;
-      --ribbon-h: 118px;
+      --ribbon-h: 98px;
       --statusbar-h: 28px;
       --sidebar-w: 242px;
       --inspector-w: 348px;
@@ -2704,6 +2704,297 @@
       display: none !important;
     }
 
+
+
+    /* =========================================================
+       V2.1C2c · Login nominal y sesión local
+       ========================================================= */
+    .auth-shell {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 32px;
+      background:
+        radial-gradient(circle at 18% 14%, rgba(7,169,184,.18), transparent 26%),
+        radial-gradient(circle at 82% 24%, rgba(1,61,114,.14), transparent 28%),
+        linear-gradient(135deg, #eef7fb 0%, #f7fafc 46%, #e8f3f7 100%);
+    }
+
+    .auth-card {
+      width: min(980px, 100%);
+      background: rgba(255,255,255,.94);
+      border: 1px solid rgba(148,163,184,.34);
+      border-radius: 20px;
+      box-shadow: 0 28px 80px rgba(15,23,42,.20);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr 1.08fr;
+    }
+
+    .auth-side {
+      padding: 34px;
+      background:
+        linear-gradient(135deg, rgba(1,61,114,.96), rgba(2,176,187,.90)),
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.18), transparent 34%);
+      color: #ffffff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-side::after {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      right: -72px;
+      bottom: -68px;
+    }
+
+    .auth-brand {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-bot {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+      background-image: url('assets/vision-bot.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-color: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.28);
+    }
+
+    .auth-brand-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+    }
+
+    .auth-brand-subtitle {
+      font-size: 12px;
+      opacity: .86;
+      margin-top: 2px;
+    }
+
+    .auth-heading {
+      position: relative;
+      z-index: 1;
+      font-size: 28px;
+      line-height: 1.12;
+      font-weight: 700;
+      letter-spacing: -.03em;
+      margin: 0 0 12px;
+    }
+
+    .auth-text {
+      position: relative;
+      z-index: 1;
+      font-size: 14px;
+      line-height: 1.65;
+      color: rgba(255,255,255,.86);
+      margin: 0 0 22px;
+    }
+
+    .auth-bullets {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .auth-bullet {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      font-size: 13px;
+      line-height: 1.45;
+      color: rgba(255,255,255,.90);
+    }
+
+    .auth-bullet span:first-child {
+      width: 22px;
+      height: 22px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,255,255,.14);
+      flex: 0 0 auto;
+      font-size: 12px;
+    }
+
+    .auth-main {
+      padding: 34px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .auth-form-title {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.15;
+      letter-spacing: -.02em;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .auth-form-subtitle {
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.5;
+      margin: -6px 0 6px;
+    }
+
+    .auth-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .auth-label {
+      font-size: 12px;
+      color: #334155;
+      font-weight: 600;
+    }
+
+    .auth-input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 12px 13px;
+      font-size: 14px;
+      outline: none;
+      background: #ffffff;
+    }
+
+    .auth-input:focus {
+      border-color: #07a9b8;
+      box-shadow: 0 0 0 3px rgba(7,169,184,.16);
+    }
+
+    .auth-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .auth-btn {
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: #ffffff;
+      padding: 11px 16px;
+      font-size: 13px;
+      font-weight: 650;
+      color: #0f172a;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(15,23,42,.08);
+    }
+
+    .auth-btn.primary {
+      background: linear-gradient(135deg, #02b0bb, #013d72);
+      color: #ffffff;
+      border-color: transparent;
+    }
+
+    .auth-status {
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 12px;
+      line-height: 1.45;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #475569;
+      min-height: 40px;
+    }
+
+    .auth-status.ok { background: #ecfdf5; color: #047857; border-color: #bbf7d0; }
+    .auth-status.bad { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+    .auth-status.warn { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+
+    .auth-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .auth-meta div {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 11px;
+      color: #64748b;
+      background: #f8fafc;
+      min-height: 54px;
+    }
+
+    .auth-meta b {
+      display: block;
+      color: #0f172a;
+      font-size: 12px;
+      margin-bottom: 3px;
+      font-weight: 650;
+    }
+
+    .auth-warning {
+      border-left: 4px solid #07a9b8;
+      background: #f0fdfa;
+      color: #0f766e;
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .auth-user-chip {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid rgba(148,163,184,.45);
+      background: rgba(255,255,255,.72);
+      color: #0f172a;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      max-width: 310px;
+    }
+
+    .auth-user-chip b {
+      font-weight: 650;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 185px;
+    }
+
+    .auth-logout-btn {
+      border: 1px solid rgba(148,163,184,.60);
+      background: rgba(255,255,255,.70);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: #334155;
+      cursor: pointer;
+    }
+
+    @media (max-width: 860px) {
+      .auth-card { grid-template-columns: 1fr; }
+      .auth-side { min-height: 260px; }
+      .auth-meta { grid-template-columns: 1fr; }
+    }
+
     /* =========================================================
        Responsive
        ========================================================= */
@@ -2788,7 +3079,7 @@
       allowRuntimeBackendConfig: true,
       allowLocalBackendOverride: true,
       defaultTab: 'operacion',
-      version: 'vNext Sprint 2.1B2 · Ribbon restaurado',
+      version: 'vNext Sprint 2.1C2c · Login integrado',
 
       endpoints: {
         live: 'visionLiveOperationsSnapshot',
@@ -2840,6 +3131,21 @@
         classFilter: 'todas',
         incidentFilter: 'abiertas'
       }
+    };
+
+
+    /***********************************************************
+     * 2B. Identidad, sesión y permisos frontend
+     ***********************************************************/
+    const VisionAuthState = {
+      sessionToken: '',
+      sessionMeta: null,
+      clientMeta: {},
+      ipDeclarada: '',
+      ipFuente: 'NO_DISPONIBLE',
+      status: 'PENDIENTE',
+      message: '',
+      lastError: ''
     };
 
     /***********************************************************
@@ -3097,12 +3403,26 @@
         }
 
         const callbackName = 'visionCb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
-        const query = new URLSearchParams({
+        const enrichedParams = {
           action,
           callback: callbackName,
           _ts: Date.now(),
           ...params
-        });
+        };
+
+        if (!enrichedParams.session_token && typeof VisionAuth !== 'undefined' && VisionAuth.getToken()) {
+          enrichedParams.session_token = VisionAuth.getToken();
+        }
+
+        if (!enrichedParams.tab && VisionState && VisionState.currentTab) {
+          enrichedParams.tab = VisionState.currentTab;
+        }
+
+        if (typeof VisionAuth !== 'undefined') {
+          Object.assign(enrichedParams, VisionAuth.getClientMeta());
+        }
+
+        const query = new URLSearchParams(enrichedParams);
 
         const url = VisionConfig.GAS_WEB_APP_URL + '?' + query.toString();
 
@@ -3700,7 +4020,8 @@
             <div class="topbar-status">
               <span class="pill ${tone}"><span class="pulse"></span>${VisionUtils.esc(operativo)}</span>
               <span class="pill info">${VisionUtils.esc(VisionConfig.version)}</span>
-              <span class="pill ${VisionConfig.GAS_WEB_APP_URL ? 'ok' : 'warn'}">${VisionConfig.GAS_WEB_APP_URL ? 'Backend real' : 'Mock local'}</span>
+              <span class="pill ${VisionConfig.GAS_WEB_APP_URL ? 'ok' : 'warn'}">${VisionConfig.GAS_WEB_APP_URL ? 'Backend real' : 'Sin backend real'}</span>
+              ${VisionAuth.userPill()}
               <span class="pill">Último snapshot: ${VisionUtils.esc(s.generadoEn || '—')}</span>
               <span class="pill">Refresco: <span id="countdownTop">${VisionState.nextRefreshIn}</span>s</span>
             </div>
@@ -3720,11 +4041,12 @@
           ['config', 'Configuración']
         ];
 
+        const visibleTabs = tabs.filter(([id]) => VisionAuth.canViewTab(id));
         return `
               <nav class="ribbon">
             <div class="ribbon-tabs">
               <button class="ribbon-file-tab" onclick="VisionActions.setTab('inicio')">Archivo</button>
-              ${tabs.map(([id, label]) => `<button class="ribbon-tab ${VisionState.currentTab === id ? 'active' : ''}" onclick="VisionActions.setTab('${id}')">${label}</button>`).join('')}
+              ${visibleTabs.map(([id, label]) => `<button class="ribbon-tab ${VisionState.currentTab === id ? 'active' : ''}" onclick="VisionActions.setTab('${id}')">${label}</button>`).join('')}
             </div>
             <div class="ribbon-body">
               ${this.ribbonGroups()}
@@ -3747,8 +4069,8 @@
         if (tab === 'vision') {
           return [
             group('Presentación', btn('◉', 'Quién es', "VisionActions.scrollToPanel('visionIdentity')", true) + btn('▣', 'Módulos', "VisionActions.scrollToPanel('visionModules')")),
-            group('Valor operativo', btn('✓', 'Qué hace', "VisionActions.scrollToPanel('visionValue')") + btn('▶', 'Ver vivo', "VisionActions.setTab('operacion')")),
-            group('Demostración', btn('✉', 'Telegram', "VisionActions.setTab('telegram')") + btn('!', 'Casos', "VisionActions.setTab('incidencias')"))
+            group('Valor operativo', btn('✓', 'Qué hace', "VisionActions.scrollToPanel('visionValue')") + VisionAuth.tabBtn('operacion', '▶', 'Ver vivo')),
+            group('Demostración', VisionAuth.tabBtn('telegram', '✉', 'Telegram') + VisionAuth.tabBtn('incidencias', '!', 'Casos'))
           ].join('');
         }
 
@@ -3756,7 +4078,7 @@
           return [
             group('Snapshot vivo', btn('↻', 'Actualizar', 'VisionActions.refreshNow()', true) + btn('▣', 'Denso', 'VisionActions.toggleDensity()')),
             group('Clases', btn('▶', 'Activas', "VisionActions.setClassFilter('activas')") + btn('◷', 'Próximas', "VisionActions.setClassFilter('proximas')") + btn('✓', 'Todas', "VisionActions.setClassFilter('todas')")),
-            group('Asistente', btn('☷', 'Timeline', "VisionActions.scrollToPanel('timelinePanel')") + btn('✉', 'Telegram', "VisionActions.setTab('telegram')") + btn('!', 'Casos', "VisionActions.setTab('incidencias')"))
+            group('Asistente', btn('☷', 'Timeline', "VisionActions.scrollToPanel('timelinePanel')") + VisionAuth.tabBtn('telegram', '✉', 'Telegram') + VisionAuth.tabBtn('incidencias', '!', 'Casos'))
           ].join('');
         }
 
@@ -3770,14 +4092,14 @@
         if (tab === 'telegram') {
           return [
             group('LOG_NOTIFICACIONES', btn('↻', 'Actualizar', 'VisionActions.refreshNow()', true) + btn('🔔', 'Alertas', "VisionActions.setTab('telegram')")),
-            group('Cruce', btn('!', 'Incidencias', "VisionActions.setTab('incidencias')") + btn('▶', 'Clases', "VisionActions.setTab('operacion')"))
+            group('Cruce', VisionAuth.tabBtn('incidencias', '!', 'Incidencias') + VisionAuth.tabBtn('operacion', '▶', 'Clases'))
           ].join('');
         }
 
         return [
           group('Operación', btn('↻', 'Actualizar', 'VisionActions.refreshNow()', true) + btn('▶', 'Vivo', "VisionActions.setTab('operacion')")),
-          group('Gestión', btn('!', 'Incid.', "VisionActions.setTab('incidencias')") + btn('✉', 'Telegram', "VisionActions.setTab('telegram')")),
-          group('Sistema', btn('⚙', 'Config', "VisionActions.setTab('config')") + btn('☷', 'Inicio', "VisionActions.setTab('inicio')"))
+          group('Gestión', VisionAuth.tabBtn('incidencias', '!', 'Incid.') + VisionAuth.tabBtn('telegram', '✉', 'Telegram')),
+          group('Sistema', VisionAuth.tabBtn('config', '⚙', 'Config') + VisionAuth.tabBtn('inicio', '☷', 'Inicio'))
         ].join('');
       },
 
@@ -3794,6 +4116,7 @@
           ['analitica', '▥', 'Analítica', ''],
           ['config', '⚙', 'Configuración', '']
         ];
+        const visibleItems = items.filter(([id]) => VisionAuth.canViewTab(id));
         return `
           <aside class="sidebar">
             <div class="sidebar-head">
@@ -3812,7 +4135,7 @@
               </div>
             </div>
             <div class="nav-list">
-              ${items.map(([id, icon, label, count]) => `
+              ${visibleItems.map(([id, icon, label, count]) => `
                 <button class="nav-item ${VisionState.currentTab === id ? 'active' : ''}" onclick="VisionActions.setTab('${id}')">
                   <span class="nav-icon">${icon}</span>
                   <span class="truncate">${label}</span>
@@ -3838,7 +4161,8 @@
           analitica: ['Analítica consolidada', 'Histórico Visión + Zoom + GO.', this.placeholder('Analítica preparada para visionAnalyticsSnapshotV2.')],
           config: ['Configuración y salud técnica', 'Modo producción, fuentes, triggers y estado del frontend.', this.viewConfig()]
         };
-        const [title, subtitle, body] = map[VisionState.currentTab] || map.operacion;
+        VisionAuth.enforceCurrentTab();
+        const [title, subtitle, body] = map[VisionState.currentTab] || map[VisionAuth.firstAllowedTab()] || map.operacion;
         return `
           <main class="main">
             <div class="view-head">
@@ -4664,11 +4988,487 @@
       }
     };
 
+
+    /***********************************************************
+     * 7B. Autenticación nominal y permisos por rol
+     ***********************************************************/
+    const VisionAuth = {
+      LS_SESSION: 'VISION_AUTH_SESSION_TOKEN_V2_1C2',
+      LS_META: 'VISION_AUTH_SESSION_META_V2_1C2',
+      LS_DEVICE_ID: 'VISION_AUTH_DEVICE_ID_V2_1C2',
+      version: 'vision-frontend-v2.1C2c',
+
+      tabPermissions: {
+        vision: 'ver_vision',
+        inicio: 'ver_inicio',
+        operacion: 'ver_operacion',
+        incidencias: 'ver_incidencias',
+        telegram: 'ver_telegram',
+        implementacion: 'ver_implementacion',
+        moodle: 'ver_moodle',
+        analitica: 'ver_analitica',
+        config: 'ver_configuracion'
+      },
+
+      async initClientMeta() {
+        await this.fetchDeclaredIp();
+        await this.buildClientMeta();
+      },
+
+      async fetchDeclaredIp() {
+        try {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 2200);
+          const res = await fetch('https://api.ipify.org?format=json', { cache: 'no-store', signal: controller.signal });
+          clearTimeout(timeout);
+          if (!res.ok) throw new Error('ipify status ' + res.status);
+          const data = await res.json();
+          VisionAuthState.ipDeclarada = data.ip || '';
+          VisionAuthState.ipFuente = VisionAuthState.ipDeclarada ? 'ipify' : 'NO_DISPONIBLE';
+        } catch (err) {
+          VisionAuthState.ipDeclarada = '';
+          VisionAuthState.ipFuente = 'NO_DISPONIBLE';
+        }
+      },
+
+      async buildClientMeta() {
+        const deviceId = this.ensureDeviceId();
+        const screenSize = `${screen.width}x${screen.height}@${window.devicePixelRatio || 1}`;
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+        const rawDevice = [
+          'VISION_DEVICE_V2_1C2', deviceId, navigator.userAgent || '', navigator.language || '',
+          timezone, screenSize, navigator.platform || ''
+        ].join('|');
+        const deviceHash = await this.sha256Hex(rawDevice);
+        VisionAuthState.clientMeta = {
+          device_hash: deviceHash,
+          user_agent: navigator.userAgent || '',
+          navegador: this.getBrowser(),
+          sistema_operativo: this.getOS(),
+          idioma: navigator.language || '',
+          timezone,
+          screen_size: screenSize,
+          frontend_version: this.version,
+          ip_declarada: VisionAuthState.ipDeclarada,
+          ip_fuente: VisionAuthState.ipFuente
+        };
+        return VisionAuthState.clientMeta;
+      },
+
+      getClientMeta() {
+        return VisionAuthState.clientMeta || {};
+      },
+
+      getToken() {
+        if (VisionAuthState.sessionToken) return VisionAuthState.sessionToken;
+        return localStorage.getItem(this.LS_SESSION) || '';
+      },
+
+      getMeta() {
+        if (VisionAuthState.sessionMeta) return VisionAuthState.sessionMeta;
+        try {
+          const raw = localStorage.getItem(this.LS_META);
+          return raw ? JSON.parse(raw) : null;
+        } catch (err) {
+          return null;
+        }
+      },
+
+      getUser() {
+        return this.getMeta()?.usuario || null;
+      },
+
+      getPermissions() {
+        return this.getMeta()?.permisos || {};
+      },
+
+      hasPermission(permission) {
+        const perms = this.getPermissions();
+        return Number(perms?.[permission] || 0) === 1;
+      },
+
+      canViewTab(tab) {
+        const perm = this.tabPermissions[tab];
+        if (!perm) return false;
+        return this.hasPermission(perm);
+      },
+
+      allowedTabs() {
+        return Object.keys(this.tabPermissions).filter(tab => this.canViewTab(tab));
+      },
+
+      firstAllowedTab() {
+        const preferred = ['operacion', 'inicio', 'vision', 'analitica', 'telegram'];
+        for (const tab of preferred) if (this.canViewTab(tab)) return tab;
+        return this.allowedTabs()[0] || 'inicio';
+      },
+
+      enforceCurrentTab() {
+        if (!this.canViewTab(VisionState.currentTab)) {
+          VisionState.currentTab = this.firstAllowedTab();
+        }
+      },
+
+      persistSession(res) {
+        VisionAuthState.sessionToken = res.session_token || this.getToken();
+        VisionAuthState.sessionMeta = {
+          session_id: res.session_id,
+          expira_en: res.expira_en,
+          usuario: res.usuario,
+          permisos: res.permisos
+        };
+        if (VisionAuthState.sessionToken) localStorage.setItem(this.LS_SESSION, VisionAuthState.sessionToken);
+        localStorage.setItem(this.LS_META, JSON.stringify(VisionAuthState.sessionMeta));
+      },
+
+      clearSession() {
+        VisionAuthState.sessionToken = '';
+        VisionAuthState.sessionMeta = null;
+        localStorage.removeItem(this.LS_SESSION);
+        localStorage.removeItem(this.LS_META);
+      },
+
+      async restoreSession() {
+        const token = this.getToken();
+        if (!token) return false;
+        try {
+          const res = await VisionAPI.jsonp('visionAuthMe', { session_token: token, tab: 'AuthRestore' });
+          if (!res || res.ok === false) {
+            this.clearSession();
+            return false;
+          }
+          this.persistSession({
+            session_token: token,
+            session_id: res.session_id,
+            expira_en: res.expira_en,
+            usuario: res.usuario,
+            permisos: res.permisos
+          });
+          VisionAuthState.status = 'AUTENTICADO';
+          return true;
+        } catch (err) {
+          console.warn('No se pudo restaurar sesión Visión:', err);
+          this.clearSession();
+          return false;
+        }
+      },
+
+      async loginFromForm() {
+        const email = this.normalizeEmail(document.getElementById('authEmail')?.value || '');
+        const password = document.getElementById('authPassword')?.value || '';
+        if (!email || !password) {
+          this.setAuthStatus('Debes ingresar correo institucional y contraseña.', 'bad');
+          return;
+        }
+        try {
+          this.setAuthStatus('Solicitando desafío seguro...', 'warn');
+          const challenge = await VisionAPI.jsonp('visionAuthChallenge', { email, tab: 'Login' });
+          if (!challenge || challenge.ok === false) {
+            this.setAuthStatus(challenge?.error || 'Usuario no autorizado o desafío denegado.', 'bad');
+            return;
+          }
+          this.setAuthStatus('Calculando prueba local. La contraseña no se envía al backend...', 'warn');
+          const proof = await this.computeLoginProof(challenge, email, password);
+          const res = await VisionAPI.jsonp('visionAuthLoginProof', {
+            email,
+            challenge_id: challenge.challenge_id,
+            proof,
+            tab: 'Login'
+          });
+          if (!res || res.ok === false) {
+            this.setAuthStatus(res?.error || 'Login denegado.', 'bad');
+            return;
+          }
+          this.persistSession(res);
+          document.getElementById('authPassword').value = '';
+          if (res.requiere_cambio_password) {
+            this.renderChangePassword('Login correcto. Debes cambiar la contraseña temporal antes de ingresar a Visión.');
+            return;
+          }
+          this.setAuthStatus('Login correcto. Cargando Visión...', 'ok');
+          await VisionApp.enterAuthenticated();
+        } catch (err) {
+          this.setAuthStatus('Error de login: ' + (err.message || err), 'bad');
+        }
+      },
+
+      async changePasswordFromForm() {
+        const token = this.getToken();
+        const meta = this.getMeta();
+        const email = this.normalizeEmail(meta?.usuario?.email || document.getElementById('authEmail')?.value || '');
+        const currentPassword = document.getElementById('authCurrentPassword')?.value || '';
+        const newPassword = document.getElementById('authNewPassword')?.value || '';
+        const newPassword2 = document.getElementById('authNewPassword2')?.value || '';
+        if (!token || !meta?.session_id) {
+          this.renderLogin('Sesión no disponible. Inicia sesión nuevamente.');
+          return;
+        }
+        if (!currentPassword || !newPassword || !newPassword2) {
+          this.setAuthStatus('Completa contraseña actual, nueva contraseña y confirmación.', 'bad');
+          return;
+        }
+        if (newPassword !== newPassword2) {
+          this.setAuthStatus('La confirmación no coincide.', 'bad');
+          return;
+        }
+        if (currentPassword === newPassword) {
+          this.setAuthStatus('La nueva contraseña no puede ser igual a la actual.', 'bad');
+          return;
+        }
+        if (!this.passwordPolicyOk(newPassword)) {
+          this.setAuthStatus('La nueva contraseña debe tener mínimo 12 caracteres e incluir minúscula, mayúscula, número y símbolo.', 'bad');
+          return;
+        }
+        try {
+          this.setAuthStatus('Solicitando desafío de cambio...', 'warn');
+          const change = await VisionAPI.jsonp('visionAuthChangePasswordChallenge', { session_token: token, tab: 'CambioPassword' });
+          if (!change || change.ok === false) {
+            this.setAuthStatus(change?.error || 'No se pudo emitir desafío de cambio.', 'bad');
+            return;
+          }
+          this.setAuthStatus('Calculando pruebas locales...', 'warn');
+          const oldProof = await this.computeOldPasswordProof(change, email, meta.session_id, currentPassword);
+          const newPasswordHash = await this.computeNewPasswordHash(change, email, newPassword);
+          const res = await VisionAPI.jsonp('visionAuthChangePasswordProof', {
+            session_token: token,
+            change_id: change.change_id,
+            old_proof: oldProof,
+            new_password_hash: newPasswordHash,
+            tab: 'CambioPassword'
+          });
+          if (!res || res.ok === false) {
+            this.setAuthStatus(res?.error || 'Cambio de contraseña denegado.', 'bad');
+            return;
+          }
+          document.getElementById('authCurrentPassword').value = '';
+          document.getElementById('authNewPassword').value = '';
+          document.getElementById('authNewPassword2').value = '';
+          const me = await VisionAPI.jsonp('visionAuthMe', { session_token: token, tab: 'CambioPassword' });
+          if (me && me.ok !== false) {
+            this.persistSession({ session_token: token, session_id: me.session_id, expira_en: me.expira_en, usuario: me.usuario, permisos: me.permisos });
+          }
+          this.setAuthStatus('Contraseña actualizada correctamente. Cargando Visión...', 'ok');
+          await VisionApp.enterAuthenticated();
+        } catch (err) {
+          this.setAuthStatus('Error al cambiar contraseña: ' + (err.message || err), 'bad');
+        }
+      },
+
+      async logout() {
+        const token = this.getToken();
+        try {
+          if (token) await VisionAPI.jsonp('visionAuthLogout', { session_token: token, tab: 'Logout' });
+        } catch (err) {
+          console.warn('Logout backend no confirmado:', err);
+        }
+        this.clearSession();
+        clearInterval(VisionState.countdownTimer);
+        clearInterval(VisionState.refreshTimer);
+        VisionState.snapshots = { live: null, executive: null, analytics: null, implementation: null, moodle: null, go: null };
+        VisionState.normalized = {
+          sistema: {}, estado: {}, kpis: {}, clases: [], incidencias: [], telegram: [], bandeja: {},
+          timeline: [], lecturaOperativa: [], endpointHealth: [], moodleProbe: null
+        };
+        this.renderLogin('Sesión cerrada correctamente.');
+      },
+
+      renderLogin(message = '') {
+        VisionApp.hideLoader();
+        const app = document.getElementById('app');
+        app.innerHTML = this.authShell({ mode: 'login', message });
+        setTimeout(() => document.getElementById('authEmail')?.focus(), 50);
+      },
+
+      renderChangePassword(message = '') {
+        VisionApp.hideLoader();
+        const app = document.getElementById('app');
+        app.innerHTML = this.authShell({ mode: 'change', message });
+        setTimeout(() => document.getElementById('authCurrentPassword')?.focus(), 50);
+      },
+
+      authShell({ mode, message }) {
+        const meta = this.getMeta();
+        const user = meta?.usuario || {};
+        const cm = this.getClientMeta();
+        const isChange = mode === 'change';
+        return `
+          <div class="auth-shell">
+            <div class="auth-card">
+              <aside class="auth-side">
+                <div class="auth-brand">
+                  <div class="auth-bot"></div>
+                  <div>
+                    <div class="auth-brand-title">Visión</div>
+                    <div class="auth-brand-subtitle">Acceso nominal y trazabilidad operativa</div>
+                  </div>
+                </div>
+                <h1 class="auth-heading">Ingreso seguro al Centro Operativo Inteligente.</h1>
+                <p class="auth-text">Cada acceso queda asociado a una persona, una sesión y una huella técnica probable del dispositivo. El uso de cuentas compartidas no forma parte del modelo de operación de Visión.</p>
+                <div class="auth-bullets">
+                  <div class="auth-bullet"><span>1</span><div>Usuario nominal con correo institucional y rol asignado.</div></div>
+                  <div class="auth-bullet"><span>2</span><div>Contraseña individual; las contraseñas no se almacenan en texto plano.</div></div>
+                  <div class="auth-bullet"><span>3</span><div>Registro de sesión, navegador, sistema, zona horaria, resolución y dispositivo probable.</div></div>
+                </div>
+              </aside>
+              <main class="auth-main">
+                <h2 class="auth-form-title">${isChange ? 'Cambio obligatorio de contraseña' : 'Iniciar sesión'}</h2>
+                <div class="auth-form-subtitle">${isChange ? 'Debes reemplazar la contraseña temporal antes de ingresar a la operación real.' : 'Usa tu correo autorizado y la contraseña entregada individualmente.'}</div>
+                ${message ? `<div class="auth-status warn" id="authStatus">${VisionUtils.esc(message)}</div>` : `<div class="auth-status" id="authStatus">Sistema de autenticación listo.</div>`}
+                ${isChange ? this.changePasswordForm(user) : this.loginForm()}
+                <div class="auth-warning">El backend real no debe ser consultado por usuarios sin sesión válida. Esta pantalla prepara el frontend para el bloqueo global por sesión.</div>
+                <div class="auth-meta">
+                  <div><b>Dispositivo</b>${VisionUtils.esc((cm.device_hash || '').slice(0, 18) || 'pendiente')}...</div>
+                  <div><b>Navegador</b>${VisionUtils.esc(cm.navegador || '—')} · ${VisionUtils.esc(cm.sistema_operativo || '—')}</div>
+                  <div><b>Zona horaria</b>${VisionUtils.esc(cm.timezone || '—')}</div>
+                  <div><b>IP declarada</b>${VisionUtils.esc(cm.ip_declarada || 'No disponible')}</div>
+                </div>
+              </main>
+            </div>
+          </div>`;
+      },
+
+      loginForm() {
+        return `
+          <div class="auth-field">
+            <label class="auth-label" for="authEmail">Correo institucional</label>
+            <input class="auth-input" id="authEmail" type="email" autocomplete="username" placeholder="usuario@pre-ucv.cl">
+          </div>
+          <div class="auth-field">
+            <label class="auth-label" for="authPassword">Contraseña</label>
+            <input class="auth-input" id="authPassword" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter') VisionAuth.loginFromForm()">
+          </div>
+          <div class="auth-actions">
+            <button class="auth-btn primary" onclick="VisionAuth.loginFromForm()">Ingresar a Visión</button>
+          </div>`;
+      },
+
+      changePasswordForm(user) {
+        return `
+          <div class="auth-field">
+            <label class="auth-label">Usuario autenticado</label>
+            <div class="auth-input" style="display:flex;align-items:center;background:#f8fafc;">${VisionUtils.esc(user.nombre || 'Usuario')} · ${VisionUtils.esc(user.email || '')}</div>
+          </div>
+          <div class="auth-field">
+            <label class="auth-label" for="authCurrentPassword">Contraseña actual / temporal</label>
+            <input class="auth-input" id="authCurrentPassword" type="password" autocomplete="current-password">
+          </div>
+          <div class="auth-field">
+            <label class="auth-label" for="authNewPassword">Nueva contraseña</label>
+            <input class="auth-input" id="authNewPassword" type="password" autocomplete="new-password">
+          </div>
+          <div class="auth-field">
+            <label class="auth-label" for="authNewPassword2">Confirmar nueva contraseña</label>
+            <input class="auth-input" id="authNewPassword2" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter') VisionAuth.changePasswordFromForm()">
+          </div>
+          <div class="auth-actions">
+            <button class="auth-btn primary" onclick="VisionAuth.changePasswordFromForm()">Cambiar contraseña y continuar</button>
+            <button class="auth-btn" onclick="VisionAuth.logout()">Cerrar sesión</button>
+          </div>`;
+      },
+
+      setAuthStatus(text, type = 'warn') {
+        const el = document.getElementById('authStatus');
+        if (!el) return;
+        el.className = 'auth-status ' + type;
+        el.textContent = text;
+      },
+
+      userPill() {
+        const user = this.getUser();
+        if (!user) return '';
+        return `<span class="auth-user-chip"><span>●</span><b>${VisionUtils.esc(user.nombre || user.email)}</b><span>${VisionUtils.esc(user.rol || '')}</span></span><button class="auth-logout-btn" onclick="VisionAuth.logout()">Salir</button>`;
+      },
+
+      tabBtn(tab, icon, text, primary = false) {
+        if (!this.canViewTab(tab)) return '';
+        return `<button class="ribbon-btn ${primary ? 'primary' : ''}" onclick="VisionActions.setTab('${tab}')"><span class="ribbon-icon">${icon}</span><span>${text}</span></button>`;
+      },
+
+      ensureDeviceId() {
+        let id = localStorage.getItem(this.LS_DEVICE_ID);
+        if (!id) {
+          const arr = new Uint8Array(24);
+          crypto.getRandomValues(arr);
+          id = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+          localStorage.setItem(this.LS_DEVICE_ID, id);
+        }
+        return id;
+      },
+
+      async sha256Hex(text) {
+        const data = new TextEncoder().encode(String(text || ''));
+        const digest = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+      },
+
+      normalizeEmail(email) {
+        return String(email || '').trim().toLowerCase();
+      },
+
+      async hashPasswordVision(email, password, salt, iterations) {
+        email = this.normalizeEmail(email);
+        let material = 'VISION_AUTH_V2_1C1|' + email + '|' + salt + '|' + String(password || '');
+        for (let i = 0; i < Number(iterations || 5000); i++) {
+          material = await this.sha256Hex(material + '|' + salt + '|' + i);
+        }
+        return material;
+      },
+
+      async computeLoginProof(challenge, email, password) {
+        const iterations = challenge.password_iterations || 5000;
+        const passwordHash = await this.hashPasswordVision(email, password, challenge.salt, iterations);
+        const raw = String(challenge.proof_prefix || 'VISION_AUTH_PROOF_V2_1C2|') +
+          this.normalizeEmail(email) + '|' + challenge.challenge_id + '|' + challenge.nonce + '|' + passwordHash;
+        return await this.sha256Hex(raw);
+      },
+
+      async computeOldPasswordProof(change, email, sessionId, oldPassword) {
+        const iterations = change.password_iterations || 5000;
+        const oldHash = await this.hashPasswordVision(email, oldPassword, change.old_salt, iterations);
+        const raw = String(change.old_proof_prefix || 'VISION_CHANGE_OLD_PROOF_V2_1C2B|') +
+          this.normalizeEmail(email) + '|' + sessionId + '|' + change.change_id + '|' + change.nonce + '|' + oldHash;
+        return await this.sha256Hex(raw);
+      },
+
+      async computeNewPasswordHash(change, email, newPassword) {
+        const iterations = change.password_iterations || 5000;
+        return await this.hashPasswordVision(email, newPassword, change.new_salt, iterations);
+      },
+
+      passwordPolicyOk(password) {
+        const p = String(password || '');
+        return p.length >= 12 && /[a-z]/.test(p) && /[A-Z]/.test(p) && /[0-9]/.test(p) && /[^A-Za-z0-9]/.test(p);
+      },
+
+      getBrowser() {
+        const ua = navigator.userAgent || '';
+        if (/Edg\//.test(ua)) return 'Edge';
+        if (/Chrome\//.test(ua)) return 'Chrome';
+        if (/Firefox\//.test(ua)) return 'Firefox';
+        if (/Safari\//.test(ua)) return 'Safari';
+        return 'Desconocido';
+      },
+
+      getOS() {
+        const ua = navigator.userAgent || '';
+        if (/Windows/i.test(ua)) return 'Windows';
+        if (/Mac OS/i.test(ua)) return 'macOS';
+        if (/Android/i.test(ua)) return 'Android';
+        if (/iPhone|iPad/i.test(ua)) return 'iOS';
+        if (/Linux/i.test(ua)) return 'Linux';
+        return 'Desconocido';
+      }
+    };
+
     /***********************************************************
      * 8. Acciones
      ***********************************************************/
     const VisionActions = {
       setTab(tab) {
+        if (!VisionAuth.canViewTab(tab)) {
+          alert('Tu rol no tiene permiso para acceder a este módulo de Visión.');
+          return;
+        }
         VisionState.currentTab = tab;
         VisionViews.render();
       },
@@ -4740,6 +5540,10 @@
       },
 
       async testAllEndpoints() {
+        if (!VisionAuth.hasPermission('probar_endpoints')) {
+          alert('Tu rol no tiene permiso para probar endpoints.');
+          return;
+        }
         const actions = [
           VisionConfig.endpoints.live,
           VisionConfig.endpoints.executive,
@@ -4770,6 +5574,10 @@
       },
 
       async runMoodleProbe() {
+        if (!VisionAuth.hasPermission('ejecutar_diagnostico_moodle')) {
+          alert('Tu rol no tiene permiso para ejecutar diagnóstico Moodle.');
+          return;
+        }
         const input = document.getElementById('moodleSiglaInput');
         const sigla = String(input?.value || '').trim();
         if (!sigla) {
@@ -4790,6 +5598,10 @@
       },
 
       async loadMoodleSnapshot() {
+        if (!VisionAuth.hasPermission('ver_moodle')) {
+          alert('Tu rol no tiene permiso para ver diagnóstico Moodle.');
+          return;
+        }
         try {
           const raw = await VisionAPI.getMoodleSnapshot();
           VisionState.normalized.moodleProbe = VisionAdapters.moodleProbe(raw, '');
@@ -4831,6 +5643,25 @@
         this.showLoaderProgress(12, 'Preparando shell de aplicación.');
         await VisionRuntime.load();
         this.showLoaderProgress(20, VisionConfig.GAS_WEB_APP_URL ? 'Backend real detectado por configuración runtime.' : 'No se detectó backend real por configuración runtime.');
+        this.showLoaderProgress(28, 'Preparando identidad, sesión y trazabilidad técnica.');
+        await VisionAuth.initClientMeta();
+        const restored = await VisionAuth.restoreSession();
+        if (!restored) {
+          this.hideLoader();
+          VisionAuth.renderLogin('Inicia sesión para acceder a la operación real de Visión.');
+          return;
+        }
+        if (VisionAuth.getUser()?.requiere_cambio_password) {
+          this.hideLoader();
+          VisionAuth.renderChangePassword('Tu cuenta requiere cambio de contraseña antes de ingresar.');
+          return;
+        }
+        await this.enterAuthenticated();
+      },
+
+      async enterAuthenticated() {
+        VisionAuth.enforceCurrentTab();
+        this.showLoaderProgress(34, 'Sesión validada. Cargando operación real según permisos.');
         VisionViews.render();
         await this.loadLive();
         this.startTimers();
@@ -4867,6 +5698,7 @@
       },
 
       async loadImplementationHealth() {
+        if (!VisionAuth.hasPermission('ver_implementacion')) return;
         try {
           const raw = await VisionAPI.getImplementationHealth();
           VisionState.snapshots.implementation = raw;
