@@ -184,7 +184,6 @@
       color: #eef7ff;
       border-bottom: 1px solid rgba(148, 184, 220, .18);
       background: linear-gradient(180deg, rgba(12, 28, 51, .98), rgba(10, 22, 39, .94));
-      overflow: hidden;
     }
 
     .ribbon-tabs {
@@ -195,6 +194,7 @@
       overflow-x: auto;
       overflow-y: hidden;
       border-bottom: 1px solid rgba(255,255,255,.08);
+      scrollbar-gutter: stable;
     }
 
     .ribbon-file-tab,
@@ -233,7 +233,6 @@
       display: flex;
       align-items: stretch;
       gap: 8px;
-      min-height: 0;
       padding: 7px 9px 8px;
       overflow-x: auto;
       overflow-y: hidden;
@@ -245,10 +244,8 @@
 
     .ribbon-group {
       min-width: 132px;
-      height: 100%;
-      min-height: 0;
       display: grid;
-      grid-template-rows: minmax(0, 1fr) 16px;
+      grid-template-rows: 1fr 16px;
       gap: 3px;
       border: 1px solid rgba(255,255,255,.105);
       border-radius: 8px;
@@ -256,7 +253,6 @@
       background: linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.038));
       box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
       position: relative;
-      overflow: hidden;
     }
 
     .ribbon-group::after {
@@ -272,11 +268,9 @@
     .ribbon-group:last-child::after { display: none; }
 
     .ribbon-buttons {
-      min-height: 0;
       display: flex;
       gap: 6px;
       align-items: stretch;
-      overflow: hidden;
     }
 
     .ribbon-btn {
@@ -301,6 +295,22 @@
 
     .ribbon-icon { font-size: 15px; line-height: 1; }
     .ribbon-label { text-align: center; color: rgba(238,247,255,.68); font-size: 10px; font-weight: 900; letter-spacing: .02em; }
+
+    .ribbon-tabs::-webkit-scrollbar,
+    .ribbon-body::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .ribbon-tabs::-webkit-scrollbar-track,
+    .ribbon-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .ribbon-tabs::-webkit-scrollbar-thumb,
+    .ribbon-body::-webkit-scrollbar-thumb {
+      background: rgba(148,184,220,.22);
+      border-radius: 999px;
+    }
 
     .backstage-summary {
       margin-top: 10px;
@@ -2778,7 +2788,7 @@
       allowRuntimeBackendConfig: true,
       allowLocalBackendOverride: true,
       defaultTab: 'operacion',
-      version: 'vNext Sprint 2.1B0 · Backend runtime',
+      version: 'vNext Sprint 2.1B2 · Ribbon restaurado',
 
       endpoints: {
         live: 'visionLiveOperationsSnapshot',
