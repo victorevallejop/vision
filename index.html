@@ -2989,6 +2989,78 @@
       cursor: pointer;
     }
 
+
+
+    .auth-progress {
+      display: none;
+      border: 1px solid rgba(7,169,184,.22);
+      background: linear-gradient(180deg, #f0fdfa, #f8fafc);
+      border-radius: 16px;
+      padding: 13px 14px;
+      gap: 11px;
+      align-items: center;
+      grid-template-columns: 34px minmax(0, 1fr);
+    }
+
+    .auth-progress.active {
+      display: grid;
+    }
+
+    .auth-spinner {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 3px solid rgba(7,169,184,.16);
+      border-top-color: #07a9b8;
+      animation: authSpin .9s linear infinite;
+    }
+
+    .auth-progress-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 5px;
+    }
+
+    .auth-progress-line {
+      height: 8px;
+      border-radius: 999px;
+      background: #dbeafe;
+      overflow: hidden;
+    }
+
+    .auth-progress-fill {
+      width: 0%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #02b0bb, #1d7df2);
+      transition: width .24s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-progress-fill::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(-45deg, rgba(255,255,255,.28) 0, rgba(255,255,255,.28) 7px, transparent 7px, transparent 14px);
+      animation: stripes 1s linear infinite;
+    }
+
+    .auth-progress-text {
+      margin-top: 5px;
+      color: #475569;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .auth-btn[disabled], .auth-input[disabled] {
+      opacity: .65;
+      cursor: not-allowed;
+    }
+
+    @keyframes authSpin { to { transform: rotate(360deg); } }
+
     @media (max-width: 860px) {
       .auth-card { grid-template-columns: 1fr; }
       .auth-side { min-height: 260px; }
@@ -3080,7 +3152,7 @@
       allowRuntimeBackendConfig: true,
       allowLocalBackendOverride: true,
       defaultTab: 'operacion',
-      version: 'vNext Sprint 2.1C2c · Login integrado',
+      version: 'vNext Sprint 2.1C2e · Login y carga unificados',
 
       endpoints: {
         live: 'visionLiveOperationsSnapshot',
@@ -4998,7 +5070,7 @@
       LS_SESSION: 'VISION_AUTH_SESSION_TOKEN_V2_1C2',
       LS_META: 'VISION_AUTH_SESSION_META_V2_1C2',
       LS_DEVICE_ID: 'VISION_AUTH_DEVICE_ID_V2_1C2',
-      version: 'vision-frontend-v2.1C2c',
+      version: 'vision-frontend-v2.1C2e',
 
       tabPermissions: {
         vision: 'ver_vision',
@@ -5163,14 +5235,16 @@
           return;
         }
         try {
-          this.setAuthStatus('Solicitando desafío seguro...', 'warn');
+          this.setAuthBusy(true, 'Validando identidad nominal', 8, 'Solicitando desafío seguro al backend.');
           const challenge = await VisionAPI.jsonp('visionAuthChallenge', { email, tab: 'Login' });
           if (!challenge || challenge.ok === false) {
+            this.setAuthBusy(false);
             this.setAuthStatus(challenge?.error || 'Usuario no autorizado o desafío denegado.', 'bad');
             return;
           }
-          this.setAuthStatus('Calculando prueba local. La contraseña no se envía al backend...', 'warn');
+          this.setAuthBusy(true, 'Protegiendo credenciales', 24, 'Calculando prueba local. La contraseña no se envía al backend.');
           const proof = await this.computeLoginProof(challenge, email, password);
+          this.setAuthBusy(true, 'Creando sesión segura', 42, 'Validando usuario, rol y permisos de Visión.');
           const res = await VisionAPI.jsonp('visionAuthLoginProof', {
             email,
             challenge_id: challenge.challenge_id,
@@ -5178,18 +5252,23 @@
             tab: 'Login'
           });
           if (!res || res.ok === false) {
+            this.setAuthBusy(false);
             this.setAuthStatus(res?.error || 'Login denegado.', 'bad');
             return;
           }
           this.persistSession(res);
           document.getElementById('authPassword').value = '';
           if (res.requiere_cambio_password) {
+            this.setAuthBusy(false);
             this.renderChangePassword('Login correcto. Debes cambiar la contraseña temporal antes de ingresar a Visión.');
             return;
           }
-          this.setAuthStatus('Login correcto. Cargando Visión...', 'ok');
-          await VisionApp.enterAuthenticated();
+          this.setAuthStatus('Login correcto. Cargando operación real de Visión...', 'ok');
+          this.setAuthBusy(true, 'Cargando operación real', 58, 'Leyendo fuentes vivas y preparando cabina operativa.');
+          const ok = await VisionApp.enterAuthenticated({ fromAuth: true });
+          if (!ok) this.setAuthBusy(false);
         } catch (err) {
+          this.setAuthBusy(false);
           this.setAuthStatus('Error de login: ' + (err.message || err), 'bad');
         }
       },
@@ -5222,15 +5301,18 @@
           return;
         }
         try {
+          this.setAuthBusy(true, 'Validando cambio de contraseña', 12, 'Solicitando desafío seguro de cambio.');
           this.setAuthStatus('Solicitando desafío de cambio...', 'warn');
           const change = await VisionAPI.jsonp('visionAuthChangePasswordChallenge', { session_token: token, tab: 'CambioPassword' });
           if (!change || change.ok === false) {
             this.setAuthStatus(change?.error || 'No se pudo emitir desafío de cambio.', 'bad');
             return;
           }
+          this.setAuthBusy(true, 'Protegiendo nueva contraseña', 34, 'Calculando pruebas locales. La nueva contraseña no se envía en texto plano.');
           this.setAuthStatus('Calculando pruebas locales...', 'warn');
           const oldProof = await this.computeOldPasswordProof(change, email, meta.session_id, currentPassword);
           const newPasswordHash = await this.computeNewPasswordHash(change, email, newPassword);
+          this.setAuthBusy(true, 'Actualizando credenciales', 52, 'Registrando nuevo hash y salt nominales.');
           const res = await VisionAPI.jsonp('visionAuthChangePasswordProof', {
             session_token: token,
             change_id: change.change_id,
@@ -5249,9 +5331,12 @@
           if (me && me.ok !== false) {
             this.persistSession({ session_token: token, session_id: me.session_id, expira_en: me.expira_en, usuario: me.usuario, permisos: me.permisos });
           }
-          this.setAuthStatus('Contraseña actualizada correctamente. Cargando Visión...', 'ok');
-          await VisionApp.enterAuthenticated();
+          this.setAuthStatus('Contraseña actualizada correctamente. Cargando operación real de Visión...', 'ok');
+          this.setAuthBusy(true, 'Cargando operación real', 58, 'Leyendo fuentes vivas y preparando cabina operativa.');
+          const ok = await VisionApp.enterAuthenticated({ fromAuth: true });
+          if (!ok) this.setAuthBusy(false);
         } catch (err) {
+          this.setAuthBusy(false);
           this.setAuthStatus('Error al cambiar contraseña: ' + (err.message || err), 'bad');
         }
       },
@@ -5316,6 +5401,14 @@
                 <h2 class="auth-form-title">${isChange ? 'Cambio obligatorio de contraseña' : 'Iniciar sesión'}</h2>
                 <div class="auth-form-subtitle">${isChange ? 'Debes reemplazar la contraseña temporal antes de ingresar a la operación real.' : 'Usa tu correo autorizado y la contraseña entregada individualmente.'}</div>
                 ${message ? `<div class="auth-status warn" id="authStatus">${VisionUtils.esc(message)}</div>` : `<div class="auth-status" id="authStatus">Sistema de autenticación listo.</div>`}
+                <div class="auth-progress" id="authProgress" aria-live="polite">
+                  <div class="auth-spinner"></div>
+                  <div>
+                    <div class="auth-progress-title" id="authProgressTitle">Preparando acceso seguro</div>
+                    <div class="auth-progress-line"><div class="auth-progress-fill" id="authProgressFill"></div></div>
+                    <div class="auth-progress-text" id="authProgressText">Esperando credenciales nominales.</div>
+                  </div>
+                </div>
                 ${isChange ? this.changePasswordForm(user) : this.loginForm()}
                 <div class="auth-warning">El backend real no debe ser consultado por usuarios sin sesión válida. Esta pantalla prepara el frontend para el bloqueo global por sesión.</div>
                 <div class="auth-meta">
@@ -5340,7 +5433,7 @@
             <input class="auth-input" id="authPassword" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter') VisionAuth.loginFromForm()">
           </div>
           <div class="auth-actions">
-            <button class="auth-btn primary" onclick="VisionAuth.loginFromForm()">Ingresar a Visión</button>
+            <button class="auth-btn primary" id="authLoginBtn" onclick="VisionAuth.loginFromForm()">Ingresar a Visión</button>
           </div>`;
       },
 
@@ -5363,7 +5456,7 @@
             <input class="auth-input" id="authNewPassword2" type="password" autocomplete="new-password" onkeydown="if(event.key==='Enter') VisionAuth.changePasswordFromForm()">
           </div>
           <div class="auth-actions">
-            <button class="auth-btn primary" onclick="VisionAuth.changePasswordFromForm()">Cambiar contraseña y continuar</button>
+            <button class="auth-btn primary" id="authChangeBtn" onclick="VisionAuth.changePasswordFromForm()">Cambiar contraseña y continuar</button>
             <button class="auth-btn" onclick="VisionAuth.logout()">Cerrar sesión</button>
           </div>`;
       },
@@ -5373,6 +5466,25 @@
         if (!el) return;
         el.className = 'auth-status ' + type;
         el.textContent = text;
+      },
+
+      setAuthBusy(active, title = 'Procesando solicitud', pct = 10, detail = '') {
+        const panel = document.getElementById('authProgress');
+        const titleEl = document.getElementById('authProgressTitle');
+        const textEl = document.getElementById('authProgressText');
+        const fill = document.getElementById('authProgressFill');
+        const inputs = document.querySelectorAll('.auth-input');
+        const buttons = document.querySelectorAll('.auth-btn');
+        if (panel) panel.classList.toggle('active', !!active);
+        if (titleEl) titleEl.textContent = title;
+        if (textEl) textEl.textContent = detail || title;
+        if (fill) fill.style.width = Math.max(0, Math.min(100, Number(pct) || 0)) + '%';
+        inputs.forEach(el => { el.disabled = !!active; });
+        buttons.forEach(el => { el.disabled = !!active; });
+      },
+
+      updateAuthProgress(pct, title, detail = '') {
+        this.setAuthBusy(true, title, pct, detail || title);
       },
 
       userPill() {
@@ -5661,40 +5773,70 @@
         await this.enterAuthenticated();
       },
 
-      async enterAuthenticated() {
+      async enterAuthenticated(options = {}) {
+        const fromAuth = !!options.fromAuth;
         VisionAuth.enforceCurrentTab();
-        this.showLoaderProgress(34, 'Sesión validada. Cargando operación real según permisos.');
-        VisionViews.render();
-        await this.loadLive();
-        this.startTimers();
+        if (fromAuth) {
+          VisionAuth.updateAuthProgress(62, 'Sesión validada', 'Cargando operación real según permisos del rol.');
+        } else {
+          this.showLoaderProgress(34, 'Sesión validada. Cargando operación real según permisos.');
+          VisionViews.render();
+        }
+        const ok = await this.loadLive({ fromAuth });
+        if (ok) this.startTimers();
+        return ok;
       },
 
-      async loadLive() {
+      async loadLive(options = {}) {
+        const fromAuth = !!options.fromAuth;
         try {
           VisionState.loading = true;
           VisionState.error = null;
-          this.showLoader(false);
-          this.showLoaderProgress(28, 'Leyendo EVENTOS_CLASE, INCIDENCIAS y LOG_NOTIFICACIONES.');
+          if (fromAuth) {
+            VisionAuth.updateAuthProgress(68, 'Leyendo fuentes vivas', 'Consultando EVENTOS_CLASE, INCIDENCIAS y LOG_NOTIFICACIONES.');
+          } else {
+            this.showLoader(false);
+            this.showLoaderProgress(28, 'Leyendo EVENTOS_CLASE, INCIDENCIAS y LOG_NOTIFICACIONES.');
+          }
 
           const raw = await VisionAPI.getLiveSnapshot();
-          this.showLoaderProgress(68, 'Normalizando clases, incidencias, Telegram y bandeja.');
+          if (fromAuth) {
+            VisionAuth.updateAuthProgress(82, 'Normalizando operación', 'Preparando clases, incidencias, Telegram y bandeja humana.');
+          } else {
+            this.showLoaderProgress(68, 'Normalizando clases, incidencias, Telegram y bandeja.');
+          }
 
           VisionState.snapshots.live = raw;
           VisionState.normalized = VisionAdapters.live(raw);
           VisionState.lastRefresh = new Date();
           VisionState.nextRefreshIn = VisionConfig.refreshSeconds;
 
-          this.showLoaderProgress(92, 'Renderizando cabina operativa.');
+          if (fromAuth) {
+            VisionAuth.updateAuthProgress(94, 'Construyendo cabina operativa', 'Aplicando permisos del rol y preparando la interfaz.');
+          } else {
+            this.showLoaderProgress(92, 'Renderizando cabina operativa.');
+          }
           VisionViews.render();
-          this.showLoaderProgress(100, 'Visión operativo.');
-          setTimeout(() => this.hideLoader(), 350);
+          if (fromAuth) {
+            VisionAuth.updateAuthProgress(100, 'Visión operativo', 'Acceso concedido.');
+          } else {
+            this.showLoaderProgress(100, 'Visión operativo.');
+            setTimeout(() => this.hideLoader(), 350);
+          }
+          return true;
         } catch (err) {
           VisionState.error = err;
           console.error(err);
-          this.hideLoader();
-          VisionViews.render();
-          // No mostrar alerta bloqueante: Visión queda disponible y reintentará en el siguiente ciclo.
-          console.warn('No se pudo cargar snapshot vivo inicial:', err.message || err);
+          if (fromAuth) {
+            VisionAuth.setAuthStatus('No se pudo cargar operación real: ' + (err.message || err), 'bad');
+            VisionAuth.updateAuthProgress(100, 'Carga no completada', 'El backend no respondió dentro del tiempo esperado. Puedes reintentar sin perder la sesión.');
+          } else {
+            this.hideLoader();
+            VisionViews.render();
+            // No mostrar alerta bloqueante: Visión queda disponible y reintentará en el siguiente ciclo.
+            console.warn('No se pudo cargar snapshot vivo inicial:', err.message || err);
+          }
+          return false;
         } finally {
           VisionState.loading = false;
         }
