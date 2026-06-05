@@ -32,7 +32,7 @@
       --radius-md: 6px;
       --radius-sm: 4px;
       --topbar-h: 46px;
-      --ribbon-h: 118px;
+      --ribbon-h: 98px;
       --statusbar-h: 28px;
       --sidebar-w: 242px;
       --inspector-w: 348px;
@@ -1773,6 +1773,38 @@
     .statusbar-left { overflow: hidden; }
     .truncate { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
+    .refresh-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 210px;
+      color: rgba(238,247,255,.9);
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .refresh-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(96,165,250,.95);
+      box-shadow: 0 0 0 0 rgba(96,165,250,.45);
+    }
+
+    .refresh-inline.is-active .refresh-dot {
+      animation: refreshPulse 1.15s ease-in-out infinite;
+      background: #22d3ee;
+    }
+
+    .refresh-inline.is-ok .refresh-dot { background: #34d399; }
+    .refresh-inline.is-warn .refresh-dot { background: #f59e0b; }
+
+    @keyframes refreshPulse {
+      0% { transform: scale(.92); box-shadow: 0 0 0 0 rgba(34,211,238,.42); }
+      70% { transform: scale(1); box-shadow: 0 0 0 7px rgba(34,211,238,0); }
+      100% { transform: scale(.92); box-shadow: 0 0 0 0 rgba(34,211,238,0); }
+    }
+
     .config-grid {
       display: grid;
       gap: 10px;
@@ -3159,7 +3191,7 @@
       allowRuntimeBackendConfig: true,
       allowLocalBackendOverride: true,
       defaultTab: 'operacion',
-      version: 'vNext Sprint 2.1C2e · Login y carga unificados',
+      version: 'vNext Sprint 2.1C2g · Snapshot en segundo plano',
 
       endpoints: {
         live: 'visionLiveOperationsSnapshot',
@@ -3185,6 +3217,10 @@
       nextRefreshIn: VisionConfig.refreshSeconds,
       refreshTimer: null,
       countdownTimer: null,
+      refreshingSnapshot: false,
+      refreshStatus: 'en espera',
+      refreshStatusKind: 'idle',
+      refreshTimerHide: null,
       snapshots: {
         live: null,
         executive: null,
@@ -5060,6 +5096,10 @@
             <div class="statusbar-left">
               <span class="truncate">Fuente viva: ${VisionUtils.esc(s.fuente || 'Sin fuente')}</span>
               <span>Última actualización: ${VisionUtils.esc(s.generadoEn || '—')}</span>
+              <span id="refreshInline" class="refresh-inline ${VisionState.refreshingSnapshot ? 'is-active' : (VisionState.refreshStatusKind === 'ok' ? 'is-ok' : (VisionState.refreshStatusKind === 'warn' ? 'is-warn' : ''))}">
+                <i class="refresh-dot"></i>
+                <span id="refreshInlineText">${VisionUtils.esc(VisionState.refreshStatus || 'en espera')}</span>
+              </span>
             </div>
             <div class="statusbar-right">
               <span>Tab: ${VisionUtils.esc(VisionState.currentTab)}</span>
@@ -5077,7 +5117,7 @@
       LS_SESSION: 'VISION_AUTH_SESSION_TOKEN_V2_1C2',
       LS_META: 'VISION_AUTH_SESSION_META_V2_1C2',
       LS_DEVICE_ID: 'VISION_AUTH_DEVICE_ID_V2_1C2',
-      version: 'vision-frontend-v2.1C2e',
+      version: 'vision-frontend-v2.1C2g',
 
       tabPermissions: {
         vision: 'ver_vision',
@@ -5622,7 +5662,7 @@
       },
 
       refreshNow() {
-        VisionApp.loadLive();
+        VisionApp.loadLive({ background: !!VisionState.snapshots.live });
       },
 
       openInspector() {
@@ -5796,11 +5836,16 @@
 
       async loadLive(options = {}) {
         const fromAuth = !!options.fromAuth;
+        const hasSnapshot = !!VisionState.snapshots.live;
+        const background = !!options.background || (!fromAuth && hasSnapshot);
         try {
           VisionState.loading = true;
           VisionState.error = null;
+
           if (fromAuth) {
             VisionAuth.updateAuthProgress(68, 'Leyendo fuentes vivas', 'Consultando EVENTOS_CLASE, INCIDENCIAS y LOG_NOTIFICACIONES.');
+          } else if (background) {
+            this.setRefreshStatus(true, 'Actualizando snapshot en segundo plano...', 'active');
           } else {
             this.showLoader(false);
             this.showLoaderProgress(28, 'Leyendo EVENTOS_CLASE, INCIDENCIAS y LOG_NOTIFICACIONES.');
@@ -5809,6 +5854,8 @@
           const raw = await VisionAPI.getLiveSnapshot();
           if (fromAuth) {
             VisionAuth.updateAuthProgress(82, 'Normalizando operación', 'Preparando clases, incidencias, Telegram y bandeja humana.');
+          } else if (background) {
+            this.setRefreshStatus(true, 'Normalizando snapshot vivo...', 'active');
           } else {
             this.showLoaderProgress(68, 'Normalizando clases, incidencias, Telegram y bandeja.');
           }
@@ -5820,12 +5867,18 @@
 
           if (fromAuth) {
             VisionAuth.updateAuthProgress(94, 'Construyendo cabina operativa', 'Aplicando permisos del rol y preparando la interfaz.');
+          } else if (background) {
+            this.setRefreshStatus(true, 'Actualizando cabina operativa...', 'active');
           } else {
             this.showLoaderProgress(92, 'Renderizando cabina operativa.');
           }
+
           VisionViews.render();
+
           if (fromAuth) {
             VisionAuth.updateAuthProgress(100, 'Visión operativo', 'Acceso concedido.');
+          } else if (background) {
+            this.setRefreshStatus(false, 'Snapshot actualizado sin interrumpir la operación.', 'ok');
           } else {
             this.showLoaderProgress(100, 'Visión operativo.');
             setTimeout(() => this.hideLoader(), 350);
@@ -5837,6 +5890,9 @@
           if (fromAuth) {
             VisionAuth.setAuthStatus('No se pudo cargar operación real: ' + (err.message || err), 'bad');
             VisionAuth.updateAuthProgress(100, 'Carga no completada', 'El backend no respondió dentro del tiempo esperado. Puedes reintentar sin perder la sesión.');
+          } else if (background) {
+            this.setRefreshStatus(false, 'No se pudo actualizar snapshot. Se conserva la vista anterior.', 'warn');
+            console.warn('No se pudo actualizar snapshot en segundo plano:', err.message || err);
           } else {
             this.hideLoader();
             VisionViews.render();
@@ -5875,9 +5931,38 @@
           if (bottom) bottom.textContent = VisionState.nextRefreshIn;
           if (VisionState.nextRefreshIn <= 0) {
             VisionState.nextRefreshIn = VisionConfig.refreshSeconds;
-            this.loadLive();
+            this.loadLive({ background: true });
           }
         }, 1000);
+      },
+
+      setRefreshStatus(active, message, kind = 'idle') {
+        VisionState.refreshingSnapshot = !!active;
+        VisionState.refreshStatus = message || (active ? 'Actualizando snapshot...' : 'en espera');
+        VisionState.refreshStatusKind = kind;
+
+        const box = document.getElementById('refreshInline');
+        const text = document.getElementById('refreshInlineText');
+        if (box) {
+          box.classList.toggle('is-active', !!active);
+          box.classList.toggle('is-ok', !active && kind === 'ok');
+          box.classList.toggle('is-warn', !active && kind === 'warn');
+        }
+        if (text) text.textContent = VisionState.refreshStatus;
+
+        clearTimeout(VisionState.refreshTimerHide);
+        if (!active && (kind === 'ok' || kind === 'warn')) {
+          VisionState.refreshTimerHide = setTimeout(() => {
+            VisionState.refreshStatus = 'en espera';
+            VisionState.refreshStatusKind = 'idle';
+            const box2 = document.getElementById('refreshInline');
+            const text2 = document.getElementById('refreshInlineText');
+            if (box2) {
+              box2.classList.remove('is-ok', 'is-warn', 'is-active');
+            }
+            if (text2) text2.textContent = VisionState.refreshStatus;
+          }, 6500);
+        }
       },
 
       showLoader(force = true) {
